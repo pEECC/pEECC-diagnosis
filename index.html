@@ -87,6 +87,21 @@ input[type=text],input[type=number],input[type=date],textarea,select{width:100%;
 .intervention-card ul{margin-top:8px;}
 .phase-badge{display:inline-block;border-radius:999px;padding:3px 9px;background:#f3f4f6;border:1px solid #d1d5db;font-size:12px;font-weight:700;}
 
+
+.steps-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+  gap:14px;
+  margin-top:18px;
+}
+.step-card{
+  border:1px solid #d1d5db;
+  border-radius:12px;
+  padding:14px;
+  background:#fff;
+}
+.step-card h3{margin-top:0;}
+
 </style>
 </head>
 <body>
@@ -95,15 +110,45 @@ input[type=text],input[type=number],input[type=date],textarea,select{width:100%;
   <p class="subtitle">EECC resources and readiness + LCC contextual diagnosis</p>
 </header>
 <nav>
-  <button class="nav-button active" data-page="resources" type="button">1. Resources</button>
-  <button class="nav-button" data-page="lcc" type="button">2. LCC diagnosis</button>
-  <button class="nav-button" data-page="dashboard" type="button">3. Dashboard</button>
-  <button class="nav-button" data-page="interpretationPage" type="button">4. Interpretation</button>
+  <button class="nav-button active" data-page="intro" type="button">1. Introduction</button>
+  <button class="nav-button" data-page="resources" type="button">2. Resources</button>
+  <button class="nav-button" data-page="lcc" type="button">3. Conditions</button>
+  <button class="nav-button" data-page="dashboard" type="button">4. Dashboard</button>
+  <button class="nav-button" data-page="interpretationPage" type="button">5. Interpretation</button>
 </nav>
 <main>
 <div id="loadStatus"></div>
-<section id="resources" class="page">
-  <h2>1. Resources</h2>
+<section id="intro" class="page">
+  <h2>About this tool</h2>
+
+  <p>Many children admitted to hospital have critical illness: severe illness where early recognition and timely treatment can prevent death or disability.</p>
+
+  <p>Hospitals need to be prepared to respond when these children arrive, and to continue the care they require throughout their hospital journey. This requires equipment and workforce, but also people and systems organised around a common goal.</p>
+
+  <p>This tool helps hospital leaders and clinical teams diagnose what is needed.</p>
+
+  <div class="steps-grid">
+    <div class="step-card">
+      <h3>Step 1: Resources</h3>
+      <p>Assess equipment, supplies, space, and workforce at hospital level and in each ward or unit caring for sick children.</p>
+    </div>
+    <div class="step-card">
+      <h3>Step 2: Conditions</h3>
+      <p>Assess whether staff, routines, roles, and relationships are organised in ways that allow, prepare, and coordinate people to care for the sick child.</p>
+    </div>
+    <div class="step-card">
+      <h3>Step 3: Dashboard</h3>
+      <p>Review the results.</p>
+    </div>
+    <div class="step-card">
+      <h3>Step 4: Interpretation</h3>
+      <p>Use the results to identify practical priorities for local action.</p>
+    </div>
+  </div>
+</section>
+
+<section id="resources" class="page" hidden>
+  <h2>2. Resources</h2>
   <p>Based on the EECC Rapid Health Facility Assessment Tool PART 1 June 2025: Health facility EECC Resource Availability &amp; Readiness.</p>
   <button id="saveNowResources" type="button">Save</button>
   <details class="instruction-box" open>
@@ -130,7 +175,7 @@ input[type=text],input[type=number],input[type=date],textarea,select{width:100%;
   <div id="wardReadiness"></div>
 </section>
 <section id="lcc" class="page" hidden>
-  <h2>2. LCC contextual diagnosis</h2>
+  <h2>3. Conditions</h2>
   <button id="saveNowLcc" type="button">Save</button>
   <div class="instruction-box">
     Multiple respondents can complete the LCC questions. The dashboard shows median and IQR to make disagreement visible for discussion.
@@ -146,7 +191,7 @@ input[type=text],input[type=number],input[type=date],textarea,select{width:100%;
   <div id="lccItems"></div>
 </section>
 <section id="dashboard" class="page" hidden>
-  <h2>3. Dashboard</h2>
+  <h2>4. Dashboard</h2>
   <div class="grid">
     <div class="metric-card"><h3>EECC facility availability</h3><div id="dashAvailability" class="metric-value">—</div><p id="dashAvailabilityDetail" class="muted"></p></div>
     <div class="metric-card"><h3>EECC ward readiness</h3><div id="dashReadiness" class="metric-value">—</div><p id="dashReadinessDetail" class="muted"></p></div>
@@ -167,7 +212,7 @@ input[type=text],input[type=number],input[type=date],textarea,select{width:100%;
 </section>
 
 <section id="interpretationPage" class="page" hidden>
-  <h2>4. Interpretation</h2>
+  <h2>5. Interpretation</h2>
   <p class="muted">This page translates the EECC resource/readiness assessment and LCC contextual diagnosis into practical priorities for local discussion. It is intended as a prioritisation aid, not a fixed intervention package.</p>
 
   <div class="panel">
@@ -581,7 +626,7 @@ document.getElementById('downloadJson').addEventListener('click',()=>download('f
 document.getElementById('downloadCsv').addEventListener('click',()=>download('facility-diagnostic-tool-summary.csv',makeCsv(),'text/csv'));
 document.getElementById('clearAll').addEventListener('click',()=>{ if(confirm('Clear all saved data in this browser?')){ localStorage.removeItem(STORE_KEY); state=defaultState(); activeWardIndex=0; activeRespondentIndex=0; renderAll(); } });
 window.__diagnosticTool = {state, eecc, lccQuestions, calculateFacilityAvailabilityScore, calculateWardReadinessScore, calculateLccSummary, renderAll};
-try { renderAll(); document.getElementById('loadStatus').innerHTML='<div class="instruction-box success-box"><b>Loaded:</b> EECC facility rows 34/34, ward rows 35/35, LCC items 7/7. Single-file v15.</div>'; } catch(e){ console.error(e); document.getElementById('loadStatus').innerHTML=`<div class="instruction-box error-box"><b>Loading error:</b> ${esc(e.message)}</div>`; }
+try { renderAll(); document.getElementById('loadStatus').innerHTML='<div class="instruction-box success-box"><b>Loaded:</b> EECC facility rows 34/34, ward rows 35/35, LCC items 7/7. Single-file v16.</div>'; } catch(e){ console.error(e); document.getElementById('loadStatus').innerHTML=`<div class="instruction-box error-box"><b>Loading error:</b> ${esc(e.message)}</div>`; }
 </script>
 </body>
 </html>
