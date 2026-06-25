@@ -102,6 +102,16 @@ input[type=text],input[type=number],input[type=date],textarea,select{width:100%;
 }
 .step-card h3{margin-top:0;}
 
+
+.dashboard-diagram .context-map{margin-top:0;}
+.context-summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin:12px 0;}
+.context-metric{border:1px solid #d1d5db;border-radius:10px;background:#fff;padding:10px;text-align:center;}
+.context-metric .metric-label{font-weight:700;font-size:13px;}
+.context-metric .metric-number{font-size:24px;font-weight:800;margin:6px 0;font-variant-numeric:tabular-nums;}
+.context-metric .metric-sub{font-size:12px;color:#4b5563;}
+.phase-box .phase-score{font-size:18px;font-weight:800;margin-top:4px;font-variant-numeric:tabular-nums;}
+.phase-box .phase-iqr{font-size:12px;color:#4b5563;font-weight:500;}
+
 </style>
 </head>
 <body>
@@ -192,39 +202,39 @@ input[type=text],input[type=number],input[type=date],textarea,select{width:100%;
 </section>
 <section id="dashboard" class="page" hidden>
   <h2>4. Dashboard</h2>
-  <div class="grid">
-    <div class="metric-card"><h3>EECC facility availability</h3><div id="dashAvailability" class="metric-value">—</div><p id="dashAvailabilityDetail" class="muted"></p></div>
-    <div class="metric-card"><h3>EECC ward readiness</h3><div id="dashReadiness" class="metric-value">—</div><p id="dashReadinessDetail" class="muted"></p></div>
-    <div class="metric-card"><h3>LCC median score</h3><div id="dashLccMean" class="metric-value">—</div><p id="dashLccDetail" class="muted"></p></div>
+  <div class="panel dashboard-diagram">
+    <h3>Facility diagnosis summary</h3>
+    <p class="muted">A simple summary of resource readiness, contextual conditions, and phases of care. Higher scores indicate stronger readiness or conditions.</p>
+    <div id="contextMap"></div>
   </div>
-  <div class="panel"><h3>Resource context map</h3><div id="contextMap"></div></div>
-  <div class="panel"><h3>Ward readiness scores</h3><div id="wardScoreTable"></div></div>
-  <div class="panel"><h3>LCC profile: median and IQR</h3><div id="lccProfile"></div></div>
-  <div class="panel"><h3>LCC respondent distribution</h3><div id="respondentDistribution"></div></div>
-  <div class="panel"><h3>Initial interpretation</h3><div id="interpretation"></div></div>
-  <div class="panel export-panel"><h3>Export / reset</h3><button id="downloadJson" type="button">Download JSON</button><button id="downloadCsv" type="button" class="secondary">Download CSV summary</button><button id="clearAll" type="button" class="danger">Clear saved data</button></div>
 </section>
 
 <section id="interpretationPage" class="page" hidden>
   <h2>5. Interpretation</h2>
-  <p class="muted">This page translates the EECC resource/readiness assessment and LCC contextual diagnosis into practical priorities for local discussion. It is intended as a prioritisation aid, not a fixed intervention package.</p>
 
   <div class="panel">
-    <h3>EECC resource and workforce action list</h3>
-    <p class="muted">Generated from EECC availability and ward/bedside readiness items that did not meet the scoring rule.</p>
-    <div id="interpEeccActionList"></div>
-  </div>
-
-  <div class="panel">
-    <h3>LCC phase-based intervention map</h3>
-    <p class="muted">Generated from the phase-of-care scores. Lowest-scoring phases are shown first. Suggested interventions are intentionally simple and suitable for generalist, resource-constrained facilities.</p>
+    <h3>What does this mean for action?</h3>
+    <p>There are priority interventions for your facility. These suggestions are generated from the phase-of-care scores and are intended to support local discussion, not prescribe a fixed intervention package.</p>
     <div id="lccInterventionMap"></div>
   </div>
 
   <div class="panel">
+    <h3>Key material resources and priority workforce gaps</h3>
+    <p>There are also some key material resources and priority workforce gaps to address. These are generated from the EECC facility availability and ward/bedside readiness assessment.</p>
+    <div id="interpEeccActionList"></div>
+  </div>
+
+  <div class="panel">
     <h3>Sequencing principle</h3>
-    <p><b>Start with the earliest weak phase and the simplest feasible intervention.</b> Resource gaps identify what is missing. LCC scores help explain which contextual condition needs strengthening for emergency care to happen reliably.</p>
+    <p><b>Start with the earliest weak phase and the simplest feasible intervention.</b> Resource gaps identify what is missing. Conditions scores help explain whether staff, routines, roles, and relationships allow, prepare, and coordinate people to care for the sick child.</p>
     <p class="muted">If respondents disagree widely, use that disagreement as a facilitated discussion trigger before choosing interventions.</p>
+  </div>
+
+  <div class="panel export-panel">
+    <h3>Export / reset</h3>
+    <button id="downloadJson" type="button">Download JSON</button>
+    <button id="downloadCsv" type="button" class="secondary">Download CSV summary</button>
+    <button id="clearAll" type="button" class="danger">Clear saved data</button>
   </div>
 </section>
 
@@ -367,7 +377,6 @@ function bar(label, value, cls='', problem=false){
 
 function contextScoreBar(label, value, cls='resource'){
   const v = value==null || Number.isNaN(value) ? null : Math.max(0, Math.min(100, value));
-  const gap = v==null ? null : 100-v;
   return `<div class="context-score">
     <div class="context-score-head">
       <span class="context-score-label">${esc(label)}</span>
@@ -376,7 +385,6 @@ function contextScoreBar(label, value, cls='resource'){
     <div class="context-score-track" title="Higher is better">
       <div class="context-score-fill ${esc(cls)}" style="width:${v==null?0:v}%"></div>
     </div>
-    ${gap==null?'':`<div class="context-score-gap">gap ${Math.round(gap)}%</div>`}
   </div>`;
 }
 
@@ -485,14 +493,10 @@ function renderLccInterventionMap(lcc){
   const rows = PHASE_ORDER.map(p => {
     const st = lcc.phaseStats[p] || {};
     return {phase:p, score:st.median, q1:st.q1, q3:st.q3, iqr:st.iqr, n:st.n || 0};
-  }).sort((a,b) => {
-    const av = a.score == null ? 99 : a.score;
-    const bv = b.score == null ? 99 : b.score;
-    return av - bv;
   });
 
   if(!rows.some(r => r.n > 0)){
-    return `<div class="action-empty"><b>No LCC scores yet.</b><br><span class="muted">Add one or more LCC respondents to generate phase-based intervention suggestions.</span></div>`;
+    return `<div class="action-empty"><b>No Conditions scores yet.</b><br><span class="muted">Add one or more respondents to generate phase-based intervention suggestions.</span></div>`;
   }
 
   return rows.map(r => {
@@ -511,88 +515,105 @@ function renderLccInterventionMap(lcc){
       </div>
       <p><b>What this may mean:</b> ${esc(info.meaning)}</p>
       ${disagreement}
-      <p><b>Simple interventions to discuss locally:</b></p>
+      <p><b>Priority interventions to discuss:</b></p>
       <ul>${info.interventions.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>
     </div>`;
   }).join('');
 }
 
 function updateDashboard(){
-  const a=calculateFacilityAvailabilityScore(); document.getElementById('dashAvailability').textContent=`${a.percent}%`; document.getElementById('dashAvailabilityDetail').textContent=`${a.points}/${a.denominator} points`;
-  const wardScores=state.wards.map(w=>({ward:w, score:calculateWardReadinessScore(w)})); const readinessMean=wardScores.length?mean(wardScores.map(x=>x.score.percent)):null;
-  document.getElementById('dashReadiness').textContent=formatPct(readinessMean); document.getElementById('dashReadinessDetail').textContent=`${wardScores.length} ward/unit assessment${wardScores.length===1?'':'s'}`;
-  const lcc=calculateLccSummary(); document.getElementById('dashLccMean').textContent=formatScore(lcc.overall.median); document.getElementById('dashLccDetail').textContent=`median (IQR) across ${state.lccRespondents.length} respondent${state.lccRespondents.length===1?'':'s'}`;
-  document.getElementById('wardScoreTable').innerHTML=`<table><thead><tr><th>Ward/unit</th><th>Points</th><th>Denominator</th><th>Readiness score</th></tr></thead><tbody>${wardScores.map((x,i)=>`<tr><td>${esc(x.ward.name||x.ward.profile.ward_unit_name||`Ward/unit ${i+1}`)}</td><td>${x.score.points}</td><td>${x.score.denominator}</td><td>${x.score.percent}%</td></tr>`).join('')}</tbody></table>`;
-  const facCats=categoryScoresFromComponents(a.components); const wardCats=aggregateWardCategoryScores(); const wardCategoryRows=wardScores.map((x,i)=>({name:x.ward.name||x.ward.profile.ward_unit_name||`Ward/unit ${i+1}`, score:x.score, cats:categoryScoresFromComponents(x.score.components)})); const materialCats=['Space','Oxygen','Equipment & supplies','Medicines & fluids'];
-  const materialProfileEl=document.getElementById('materialReadinessProfile');
-  if(materialProfileEl) materialProfileEl.innerHTML=`<div class="two-col"><div><h4>Facility-level availability</h4>${materialCats.map(c=>bar(c,facCats[c]?facCats[c].percent:null)).join('')}<div class="bar-note">Bars show the score, not the gap: higher = better facility-level availability.</div></div><div><h4>Ward/bedside readiness by ward/unit</h4>${wardCategoryRows.map(w=>`<div class="panel"><h4>${esc(w.name)} <span class="small">(${w.score.points}/${w.score.denominator} = ${w.score.percent}%)</span></h4>${materialCats.map(c=>bar(c,w.cats[c]?w.cats[c].percent:null)).join('')}<div class="bar-note">Bars show the score, not the gap: higher = better point-of-care readiness for this ward/unit. Space is mainly assessed at facility level.</div></div>`).join('')}</div></div>`;
-  const humanProfileEl=document.getElementById('humanResourceProfile');
-  if(humanProfileEl) humanProfileEl.innerHTML=`<div class="two-col"><div><h4>Facility-level human resources / systems availability</h4>${bar('Human resources & systems',facCats['Human resources & systems']?facCats['Human resources & systems'].percent:null)}<div class="bar-note">Bars show the score, not the gap: higher = better facility-level human resources / systems availability.</div></div><div><h4>Ward-level human resources / systems readiness by ward/unit</h4>${wardCategoryRows.map(w=>`<div class="panel"><h4>${esc(w.name)} <span class="small">(${w.score.percent}%)</span></h4>${bar('Human resources & systems',w.cats['Human resources & systems']?w.cats['Human resources & systems'].percent:null)}<div class="bar-note">Bars show the score, not the gap: higher = better ward-level readiness for this ward/unit.</div></div>`).join('')}</div></div>`;
-  document.getElementById('lccProfile').innerHTML=`<h4>LCC domain scores: median and IQR, denominator 5</h4>${boxPlot('Legitimacy',lcc.domainStats.Legitimacy,'legitimacy')}${boxPlot('Capability',lcc.domainStats.Capability,'capability')}${boxPlot('Connectedness',lcc.domainStats.Connectedness,'connectedness')}<h4>Phase-of-care scores mapped from CMOCs</h4>${PHASE_ORDER.map(p=>boxPlot(p,lcc.phaseStats[p],'phase')).join('')}<div class="small"><b>Phase scoring:</b> Entry uses the entry question. Recognition uses the entry, recognition, and workload questions. Response uses recognition, workload, authority, and continuity questions. Continuity uses recognition, workload, responsibility, authority, and continuity questions. Questions that span two LCC domains contribute half to each relevant domain.</div>`;
-  document.getElementById('respondentDistribution').innerHTML=`<table class="respondent-table"><thead><tr><th>Respondent</th><th>Role/group</th><th>Overall</th><th>Legitimacy</th><th>Capability</th><th>Connectedness</th><th>Entry</th><th>Recognition</th><th>Response</th><th>Continuity</th></tr></thead><tbody>${lcc.respondents.map(r=>`<tr><td>${esc(r.respondent.name||`Respondent ${r.idx+1}`)}</td><td>${esc(r.respondent.role||'')}</td><td>${formatScore(r.overall)}</td><td>${formatScore(r.domains.Legitimacy)}</td><td>${formatScore(r.domains.Capability)}</td><td>${formatScore(r.domains.Connectedness)}</td><td>${formatScore(r.phases.ENTRY)}</td><td>${formatScore(r.phases.RECOGNITION)}</td><td>${formatScore(r.phases.RESPONSE)}</td><td>${formatScore(r.phases.CONTINUITY)}</td></tr>`).join('')}</tbody></table>`;
-  document.getElementById('contextMap').innerHTML=renderContextMap(facCats,wardCats,lcc);
-  let interp='';
-  if(a.percent < 70) interp += '<p><b>Resource availability constraint:</b> Facility-level EECC resources appear incomplete. Start with availability, functionality and distribution of material resources and workforce before over-interpreting LCC scores.</p>';
-  else if(readinessMean!=null && readinessMean < 70) interp += '<p><b>Point-of-care readiness constraint:</b> resources may exist in the facility but are not reliably functional, accessible or distributed at ward/bedside level.</p>';
-  else interp += '<p><b>Contextual diagnosis priority:</b> EECC availability/readiness appear relatively strong. If care is still delayed, examine the contextual conditions that allow prioritisation, action, and shared responsibility.</p>';
-  const lowDomains=DOMAIN_ORDER.filter(d=>lcc.domainStats[d].median!=null && lcc.domainStats[d].median<=2.5); if(lowDomains.length) interp += `<p><b>Contextual conditions needing attention:</b> ${lowDomains.join(', ')}.</p>`;
-  const earliest=PHASE_ORDER.find(p=>lcc.phaseStats[p].median!=null && lcc.phaseStats[p].median<=2.5); if(earliest) interp += `<p><b>Earliest phase needing attention:</b> ${esc(earliest)}.</p>`;
-  const highSpread=[...DOMAIN_ORDER.map(d=>[d,lcc.domainStats[d]]),...PHASE_ORDER.map(p=>[p,lcc.phaseStats[p]])].filter(([_,s])=>s.iqr!=null && s.iqr>=1.5).map(([k])=>k); if(highSpread.length) interp += `<p><b>Useful disagreement for discussion:</b> ${highSpread.join(', ')} show wide respondent spread.</p>`;
-  document.getElementById('interpretation').innerHTML=interp;
+  const a = calculateFacilityAvailabilityScore();
+  const wardScores = state.wards.map(w => ({ward:w, score:calculateWardReadinessScore(w)}));
+  const readinessMean = wardScores.length ? mean(wardScores.map(x => x.score.percent)) : null;
+  const lcc = calculateLccSummary();
+
+  const facCats = categoryScoresFromComponents(a.components);
+  const wardCats = aggregateWardCategoryScores();
+
+  const contextEl = document.getElementById('contextMap');
+  if(contextEl) contextEl.innerHTML = renderContextMap(a, readinessMean, facCats, wardCats, lcc);
+
   const actionRows = eeccActionRows(a, wardScores);
-  if(document.getElementById('eeccActionList')) document.getElementById('eeccActionList').innerHTML = renderEeccActionList(actionRows);
   if(document.getElementById('interpEeccActionList')) document.getElementById('interpEeccActionList').innerHTML = renderEeccActionList(actionRows);
   if(document.getElementById('lccInterventionMap')) document.getElementById('lccInterventionMap').innerHTML = renderLccInterventionMap(lcc);
 }
-function renderContextMap(facCats,wardCats,lcc){
-  const scoreOrZero=(st)=>st&&st.median!=null?st.median/5*100:null;
+function scoreIqrText(st){
+  if(!st || st.n===0 || st.median==null) return '—';
+  return `${formatScore(st.median)} (${formatScore(st.q1)}–${formatScore(st.q3)})`;
+}
+function percentMetric(label, value, sub=''){
+  return `<div class="context-metric">
+    <div class="metric-label">${esc(label)}</div>
+    <div class="metric-number">${formatPct(value)}</div>
+    ${sub?`<div class="metric-sub">${esc(sub)}</div>`:''}
+  </div>`;
+}
+function scoreMetric(label, st, sub=''){
+  return `<div class="context-metric">
+    <div class="metric-label">${esc(label)}</div>
+    <div class="metric-number">${scoreIqrText(st)}</div>
+    <div class="metric-sub">${sub?esc(sub):'median (IQR), denominator 5'}${st&&st.n?`; n=${st.n}`:''}</div>
+  </div>`;
+}
+function renderContextMap(availabilityScore, readinessMean, facCats, wardCats, lcc){
   const valid=arr=>arr.filter(v=>v!=null && !Number.isNaN(v));
   const avg=arr=>{ const v=valid(arr); return v.length?mean(v):null; };
   const materialScore=avg(['Space','Oxygen','Equipment & supplies','Medicines & fluids'].flatMap(c=>[facCats[c]?.percent, wardCats[c]?.percent]));
   const humanScore=avg([facCats['Human resources & systems']?.percent, wardCats['Human resources & systems']?.percent]);
 
   return `<div class="context-map">
-    <div class="context-title">Resource context</div>
+    <div class="context-title">Total scores</div>
+    <div class="context-summary-grid">
+      ${percentMetric('Facility EECC availability', availabilityScore.percent, `${availabilityScore.points}/${availabilityScore.denominator} points`)}
+      ${percentMetric('Ward/bedside EECC readiness', readinessMean, `${state.wards.length} ward/unit assessment${state.wards.length===1?'':'s'}`)}
+      ${scoreMetric('Overall conditions score', lcc.overall, 'median (IQR), denominator 5')}
+    </div>
+
+    <div class="context-title">Resources</div>
     <div class="context-row two">
       <div class="context-cell">
-        <strong>Material resource</strong>
-        <div class="small">Oxygen | Equipment and supplies | Medicines | Space</div>
-        ${contextScoreBar('Resource score',materialScore,'resource')}
+        <strong>Material resources</strong>
+        <div class="small">Space | Oxygen | Equipment and supplies | Medicines and fluids</div>
+        ${contextScoreBar('Score', materialScore, 'resource')}
       </div>
       <div class="context-cell">
-        <strong>Human resources</strong>
+        <strong>Human resources and systems</strong>
         <div class="small">Dedicated staff | Non-clinical staff | After-hours staffing coverage</div>
-        ${contextScoreBar('Workforce / systems score',humanScore,'resource')}
+        ${contextScoreBar('Score', humanScore, 'resource')}
       </div>
     </div>
 
-    <div class="context-title">Enabling contextual conditions</div>
+    <div class="context-title">Contextual conditions</div>
     <div class="context-row">
       <div class="context-cell legit">
-        <strong>Set apart, prioritise and allow</strong>
-        <div>(Legitimacy conditions)</div>
-        ${contextScoreBar('Median score',scoreOrZero(lcc.domainStats.Legitimacy),'legitimacy')}
+        <strong>Legitimacy</strong>
+        <div class="small">Set apart, prioritise, and allow</div>
+        <div class="phase-score">${scoreIqrText(lcc.domainStats.Legitimacy)} / 5</div>
+        <div class="phase-iqr">median (IQR)</div>
       </div>
       <div class="context-cell cap">
-        <strong>Enable action</strong>
-        <div>(Capability conditions)</div>
-        ${contextScoreBar('Median score',scoreOrZero(lcc.domainStats.Capability),'capability')}
+        <strong>Capability</strong>
+        <div class="small">Enable action</div>
+        <div class="phase-score">${scoreIqrText(lcc.domainStats.Capability)} / 5</div>
+        <div class="phase-iqr">median (IQR)</div>
       </div>
       <div class="context-cell conn">
-        <strong>Bridge boundaries and share responsibility</strong>
-        <div>(Connectedness conditions)</div>
-        ${contextScoreBar('Median score',scoreOrZero(lcc.domainStats.Connectedness),'connectedness')}
+        <strong>Connectedness</strong>
+        <div class="small">Bridge boundaries and share responsibility</div>
+        <div class="phase-score">${scoreIqrText(lcc.domainStats.Connectedness)} / 5</div>
+        <div class="phase-iqr">median (IQR)</div>
       </div>
     </div>
 
-    <div class="context-title">Effective emergency care</div>
+    <div class="context-title">Phases of care</div>
     <div class="phase-strip">
-      ${PHASE_ORDER.map(p=>`<div class="phase-box">${esc(p.charAt(0)+p.slice(1).toLowerCase())}<br><span class="small">${formatScore(lcc.phaseStats[p].median)}/5</span></div>`).join('')}
+      ${PHASE_ORDER.map(p=>`<div class="phase-box">${esc(p.charAt(0)+p.slice(1).toLowerCase())}<div class="phase-score">${scoreIqrText(lcc.phaseStats[p])} / 5</div><div class="phase-iqr">median (IQR)</div></div>`).join('')}
     </div>
     <div class="legend small">
       <span><i style="background:var(--blue-strong)"></i>Legitimacy</span>
       <span><i style="background:var(--green-strong)"></i>Capability</span>
       <span><i style="background:var(--purple-strong)"></i>Connectedness</span>
+      <span><i style="background:var(--grey)"></i>Phases of care</span>
     </div>
   </div>`;
 }
@@ -622,7 +643,7 @@ document.getElementById('downloadJson').addEventListener('click',()=>download('f
 document.getElementById('downloadCsv').addEventListener('click',()=>download('facility-diagnostic-tool-summary.csv',makeCsv(),'text/csv'));
 document.getElementById('clearAll').addEventListener('click',()=>{ if(confirm('Clear all saved data in this browser?')){ localStorage.removeItem(STORE_KEY); state=defaultState(); activeWardIndex=0; activeRespondentIndex=0; renderAll(); } });
 window.__diagnosticTool = {state, eecc, lccQuestions, calculateFacilityAvailabilityScore, calculateWardReadinessScore, calculateLccSummary, renderAll};
-try { renderAll(); document.getElementById('loadStatus').innerHTML='<div class="instruction-box success-box"><b>Loaded:</b> EECC facility rows 34/34, ward rows 35/35, LCC items 7/7. Single-file v18.</div>'; } catch(e){ console.error(e); document.getElementById('loadStatus').innerHTML=`<div class="instruction-box error-box"><b>Loading error:</b> ${esc(e.message)}</div>`; }
+try { renderAll(); document.getElementById('loadStatus').innerHTML='<div class="instruction-box success-box"><b>Loaded:</b> EECC facility rows 34/34, ward rows 35/35, LCC items 7/7. Single-file v19.</div>'; } catch(e){ console.error(e); document.getElementById('loadStatus').innerHTML=`<div class="instruction-box error-box"><b>Loading error:</b> ${esc(e.message)}</div>`; }
 </script>
 </body>
 </html>
