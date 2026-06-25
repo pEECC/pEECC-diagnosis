@@ -41,6 +41,37 @@ input[type=text],input[type=number],input[type=date],textarea,select{width:100%;
   background:#f7f7f7;
 }
 
+
+/* v10 refinement: full-width score meters inside the conceptual map so LCC scores remain visible. */
+.context-score{
+  margin-top:12px;
+  text-align:left;
+}
+.context-score-head{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  align-items:baseline;
+  font-size:13px;
+  margin-bottom:5px;
+}
+.context-score-label{font-weight:600;}
+.context-score-value{font-weight:700;font-variant-numeric:tabular-nums;}
+.context-score-track{
+  width:100%;
+  height:16px;
+  border-radius:999px;
+  background:#f3f4f6;
+  border:1px solid #cfd5dc;
+  overflow:hidden;
+}
+.context-score-fill{height:100%;border-radius:999px;min-width:0;}
+.context-score-fill.legitimacy{background:var(--blue-strong);}
+.context-score-fill.capability{background:var(--green-strong);}
+.context-score-fill.connectedness{background:var(--purple-strong);}
+.context-score-fill.resource{background:#9fb4c0;}
+.context-score-gap{font-size:11px;color:#666;margin-top:3px;}
+
 </style>
 </head>
 <body>
@@ -250,6 +281,22 @@ function bar(label, value, cls='', problem=false){
   const fillClass = cls || 'score';
   return `<div class="bar-row"><div>${esc(label)}</div><div><div class="bar-track" title="Higher is better"><div class="bar-fill ${fillClass}" style="width:${v}%"></div></div></div><div class="bar-value">${value==null?'—':Math.round(value)+'%'}${gap==null?'':`<span class="bar-gap">gap ${Math.round(gap)}%</span>`}</div></div>`;
 }
+
+function contextScoreBar(label, value, cls='resource'){
+  const v = value==null || Number.isNaN(value) ? null : Math.max(0, Math.min(100, value));
+  const gap = v==null ? null : 100-v;
+  return `<div class="context-score">
+    <div class="context-score-head">
+      <span class="context-score-label">${esc(label)}</span>
+      <span class="context-score-value">${v==null?'—':Math.round(v)+'%'}</span>
+    </div>
+    <div class="context-score-track" title="Higher is better">
+      <div class="context-score-fill ${esc(cls)}" style="width:${v==null?0:v}%"></div>
+    </div>
+    ${gap==null?'':`<div class="context-score-gap">gap ${Math.round(gap)}%</div>`}
+  </div>`;
+}
+
 function boxPlot(label, st, cls='') { const max=5; if(!st || st.n===0) return `<div class="box-row"><div>${esc(label)}</div><div class="muted">No scores yet</div><div></div></div>`; const q1=st.q1/max*100, q3=st.q3/max*100, med=st.median/max*100; const spreadClass=st.iqr>=1.5?'spread-high':''; return `<div class="box-row"><div>${esc(label)}</div><div><div class="box-track"><div class="iqr-box ${cls}" style="left:${q1}%;width:${Math.max(2,q3-q1)}%"></div><div class="median-line" style="left:${med}%"></div></div><div class="scale-labels"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div></div><div class="bar-value ${spreadClass}">${formatScore(st.median)} (${formatScore(st.q1)}–${formatScore(st.q3)})<br><span class="small">n=${st.n}</span></div></div>`; }
 function updateDashboard(){
   const a=calculateFacilityAvailabilityScore(); document.getElementById('dashAvailability').textContent=`${a.percent}%`; document.getElementById('dashAvailabilityDetail').textContent=`${a.points}/${a.denominator} points`;
@@ -272,7 +319,58 @@ function updateDashboard(){
   const highSpread=[...DOMAIN_ORDER.map(d=>[d,lcc.domainStats[d]]),...PHASE_ORDER.map(p=>[p,lcc.phaseStats[p]])].filter(([_,s])=>s.iqr!=null && s.iqr>=1.5).map(([k])=>k); if(highSpread.length) interp += `<p><b>Useful disagreement for discussion:</b> ${highSpread.join(', ')} show wide respondent spread.</p>`;
   document.getElementById('interpretation').innerHTML=interp;
 }
-function renderContextMap(facCats,wardCats,lcc){ const scoreOrZero=(st)=>st&&st.median!=null?st.median/5*100:0; const valid=arr=>arr.filter(v=>v!=null && !Number.isNaN(v)); const avg=arr=>{ const v=valid(arr); return v.length?mean(v):null; }; const materialScore=avg(['Space','Oxygen','Equipment & supplies','Medicines & fluids'].flatMap(c=>[facCats[c]?.percent, wardCats[c]?.percent])); const humanScore=avg([facCats['Human resources & systems']?.percent, wardCats['Human resources & systems']?.percent]); return `<div class="context-map"><div class="context-title">Resource context</div><div class="context-row two"><div class="context-cell"><strong>Material resource</strong> Oxygen | Equipment and supplies | Medicines | Space ${bar('Resource score',materialScore)}</div><div class="context-cell"><strong>Human resources</strong> Dedicated staff | Non-clinical staff | After-hours staffing coverage ${bar('Workforce / systems score',humanScore)}</div></div><div class="context-title">Enabling contextual conditions</div><div class="context-row"><div class="context-cell legit"><strong>Set apart, prioritise and allow</strong>(Legitimacy conditions)${bar('Median score',scoreOrZero(lcc.domainStats.Legitimacy),'legitimacy')}</div><div class="context-cell cap"><strong>Enable action</strong>(Capability conditions)${bar('Median score',scoreOrZero(lcc.domainStats.Capability),'capability')}</div><div class="context-cell conn"><strong>Bridge boundaries and share responsibility</strong>(Connectedness conditions)${bar('Median score',scoreOrZero(lcc.domainStats.Connectedness),'connectedness')}</div></div><div class="context-title">Effective emergency care</div><div class="phase-strip">${PHASE_ORDER.map(p=>`<div class="phase-box">${esc(p.charAt(0)+p.slice(1).toLowerCase())}<br><span class="small">${formatScore(lcc.phaseStats[p].median)}/5</span></div>`).join('')}</div><div class="legend small"><span><i style="background:var(--blue-strong)"></i>Legitimacy</span><span><i style="background:var(--green-strong)"></i>Capability</span><span><i style="background:var(--purple-strong)"></i>Connectedness</span></div></div>`; }
+function renderContextMap(facCats,wardCats,lcc){
+  const scoreOrZero=(st)=>st&&st.median!=null?st.median/5*100:null;
+  const valid=arr=>arr.filter(v=>v!=null && !Number.isNaN(v));
+  const avg=arr=>{ const v=valid(arr); return v.length?mean(v):null; };
+  const materialScore=avg(['Space','Oxygen','Equipment & supplies','Medicines & fluids'].flatMap(c=>[facCats[c]?.percent, wardCats[c]?.percent]));
+  const humanScore=avg([facCats['Human resources & systems']?.percent, wardCats['Human resources & systems']?.percent]);
+
+  return `<div class="context-map">
+    <div class="context-title">Resource context</div>
+    <div class="context-row two">
+      <div class="context-cell">
+        <strong>Material resource</strong>
+        <div class="small">Oxygen | Equipment and supplies | Medicines | Space</div>
+        ${contextScoreBar('Resource score',materialScore,'resource')}
+      </div>
+      <div class="context-cell">
+        <strong>Human resources</strong>
+        <div class="small">Dedicated staff | Non-clinical staff | After-hours staffing coverage</div>
+        ${contextScoreBar('Workforce / systems score',humanScore,'resource')}
+      </div>
+    </div>
+
+    <div class="context-title">Enabling contextual conditions</div>
+    <div class="context-row">
+      <div class="context-cell legit">
+        <strong>Set apart, prioritise and allow</strong>
+        <div>(Legitimacy conditions)</div>
+        ${contextScoreBar('Median score',scoreOrZero(lcc.domainStats.Legitimacy),'legitimacy')}
+      </div>
+      <div class="context-cell cap">
+        <strong>Enable action</strong>
+        <div>(Capability conditions)</div>
+        ${contextScoreBar('Median score',scoreOrZero(lcc.domainStats.Capability),'capability')}
+      </div>
+      <div class="context-cell conn">
+        <strong>Bridge boundaries and share responsibility</strong>
+        <div>(Connectedness conditions)</div>
+        ${contextScoreBar('Median score',scoreOrZero(lcc.domainStats.Connectedness),'connectedness')}
+      </div>
+    </div>
+
+    <div class="context-title">Effective emergency care</div>
+    <div class="phase-strip">
+      ${PHASE_ORDER.map(p=>`<div class="phase-box">${esc(p.charAt(0)+p.slice(1).toLowerCase())}<br><span class="small">${formatScore(lcc.phaseStats[p].median)}/5</span></div>`).join('')}
+    </div>
+    <div class="legend small">
+      <span><i style="background:var(--blue-strong)"></i>Legitimacy</span>
+      <span><i style="background:var(--green-strong)"></i>Capability</span>
+      <span><i style="background:var(--purple-strong)"></i>Connectedness</span>
+    </div>
+  </div>`;
+}
 function renderAll(){ renderFacilityProfile(); renderFacilityAvailability(); renderWardSelect(); renderWardProfile(); renderWardReadiness(); renderLcc(); updateDashboard(); }
 function syncWardName(){ const w=getWard(); w.name=w.profile.ward_unit_name || w.name || `Ward/unit ${activeWardIndex+1}`; renderWardSelect(); }
 function syncRespondentName(){ const r=getRespondent(); if(!r.name) r.name=`Respondent ${activeRespondentIndex+1}`; renderLccRespondentSelect(); }
@@ -299,7 +397,7 @@ document.getElementById('downloadJson').addEventListener('click',()=>download('f
 document.getElementById('downloadCsv').addEventListener('click',()=>download('facility-diagnostic-tool-summary.csv',makeCsv(),'text/csv'));
 document.getElementById('clearAll').addEventListener('click',()=>{ if(confirm('Clear all saved data in this browser?')){ localStorage.removeItem(STORE_KEY); state=defaultState(); activeWardIndex=0; activeRespondentIndex=0; renderAll(); } });
 window.__diagnosticTool = {state, eecc, lccQuestions, calculateFacilityAvailabilityScore, calculateWardReadinessScore, calculateLccSummary, renderAll};
-try { renderAll(); document.getElementById('loadStatus').innerHTML='<div class="instruction-box success-box"><b>Loaded:</b> EECC facility rows 34/34, ward rows 35/35, LCC items 7/7. Single-file v9.</div>'; } catch(e){ console.error(e); document.getElementById('loadStatus').innerHTML=`<div class="instruction-box error-box"><b>Loading error:</b> ${esc(e.message)}</div>`; }
+try { renderAll(); document.getElementById('loadStatus').innerHTML='<div class="instruction-box success-box"><b>Loaded:</b> EECC facility rows 34/34, ward rows 35/35, LCC items 7/7. Single-file v10.</div>'; } catch(e){ console.error(e); document.getElementById('loadStatus').innerHTML=`<div class="instruction-box error-box"><b>Loading error:</b> ${esc(e.message)}</div>`; }
 </script>
 </body>
 </html>
