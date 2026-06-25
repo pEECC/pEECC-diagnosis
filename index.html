@@ -297,7 +297,16 @@ function contextScoreBar(label, value, cls='resource'){
   </div>`;
 }
 
-function boxPlot(label, st, cls='') { const max=5; if(!st || st.n===0) return `<div class="box-row"><div>${esc(label)}</div><div class="muted">No scores yet</div><div></div></div>`; const q1=st.q1/max*100, q3=st.q3/max*100, med=st.median/max*100; const spreadClass=st.iqr>=1.5?'spread-high':''; return `<div class="box-row"><div>${esc(label)}</div><div><div class="box-track"><div class="iqr-box ${cls}" style="left:${q1}%;width:${Math.max(2,q3-q1)}%"></div><div class="median-line" style="left:${med}%"></div></div><div class="scale-labels"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div></div><div class="bar-value ${spreadClass}">${formatScore(st.median)} (${formatScore(st.q1)}–${formatScore(st.q3)})<br><span class="small">n=${st.n}</span></div></div>`; }
+function boxPlot(label, st, cls='') {
+  // LCC scores are on a 1–5 scale. The visual axis also runs from 1 to 5.
+  // Therefore positions must be normalised as (score - 1) / 4, not score / 5.
+  const min=1, max=5;
+  const pos = v => Math.max(0, Math.min(100, ((v-min)/(max-min))*100));
+  if(!st || st.n===0) return `<div class="box-row"><div>${esc(label)}</div><div class="muted">No scores yet</div><div></div></div>`;
+  const q1=pos(st.q1), q3=pos(st.q3), med=pos(st.median);
+  const spreadClass=st.iqr>=1.5?'spread-high':'';
+  return `<div class="box-row"><div>${esc(label)}</div><div><div class="box-track"><div class="iqr-box ${cls}" style="left:${q1}%;width:${Math.max(2,q3-q1)}%"></div><div class="median-line" style="left:${med}%"></div></div><div class="scale-labels"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div></div><div class="bar-value ${spreadClass}">${formatScore(st.median)} (${formatScore(st.q1)}–${formatScore(st.q3)})<br><span class="small">n=${st.n}</span></div></div>`;
+}
 function updateDashboard(){
   const a=calculateFacilityAvailabilityScore(); document.getElementById('dashAvailability').textContent=`${a.percent}%`; document.getElementById('dashAvailabilityDetail').textContent=`${a.points}/${a.denominator} points`;
   const wardScores=state.wards.map(w=>({ward:w, score:calculateWardReadinessScore(w)})); const readinessMean=wardScores.length?mean(wardScores.map(x=>x.score.percent)):null;
@@ -397,7 +406,7 @@ document.getElementById('downloadJson').addEventListener('click',()=>download('f
 document.getElementById('downloadCsv').addEventListener('click',()=>download('facility-diagnostic-tool-summary.csv',makeCsv(),'text/csv'));
 document.getElementById('clearAll').addEventListener('click',()=>{ if(confirm('Clear all saved data in this browser?')){ localStorage.removeItem(STORE_KEY); state=defaultState(); activeWardIndex=0; activeRespondentIndex=0; renderAll(); } });
 window.__diagnosticTool = {state, eecc, lccQuestions, calculateFacilityAvailabilityScore, calculateWardReadinessScore, calculateLccSummary, renderAll};
-try { renderAll(); document.getElementById('loadStatus').innerHTML='<div class="instruction-box success-box"><b>Loaded:</b> EECC facility rows 34/34, ward rows 35/35, LCC items 7/7. Single-file v10.</div>'; } catch(e){ console.error(e); document.getElementById('loadStatus').innerHTML=`<div class="instruction-box error-box"><b>Loading error:</b> ${esc(e.message)}</div>`; }
+try { renderAll(); document.getElementById('loadStatus').innerHTML='<div class="instruction-box success-box"><b>Loaded:</b> EECC facility rows 34/34, ward rows 35/35, LCC items 7/7. Single-file v11.</div>'; } catch(e){ console.error(e); document.getElementById('loadStatus').innerHTML=`<div class="instruction-box error-box"><b>Loading error:</b> ${esc(e.message)}</div>`; }
 </script>
 </body>
 </html>
