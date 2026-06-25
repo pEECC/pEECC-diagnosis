@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Emergency Care Facility Diagnostic Tool</title>
+<title>Paediatric EECC Diagnostic Tool</title>
 <style>
 :root{
   --blue:#dfeff7; --blue-strong:#94afbf;
@@ -491,7 +491,7 @@ tbody tr:hover td{background:#fbfdff;}
 </head>
 <body>
 <header>
-  <h1>Emergency Care Facility Diagnostic Tool</h1>
+  <h1>Paediatric EECC Diagnostic Tool</h1>
   <p class="subtitle">EECC resources and readiness + LCC contextual diagnosis</p>
 </header>
 <nav>
@@ -604,7 +604,7 @@ tbody tr:hover td{background:#fbfdff;}
 
   <div class="panel">
     <h3>What do the conditions scores suggest?</h3>
-    <p>These results help explain the contextual conditions, beyond resources and workforce, that are needed for responsive care of the critically ill child. The contextual condition of <b>Legitimacy</b> refers to whether staff feel allowed and expected to act, and whether emergency care is prioritised. The contextual condition of <b>Capability</b> refers to staff confidence, competence, and practical ability to recognise and respond. The contextual condition of <b>Connectedness</b> refers to how people — clinical and non-clinical staff, patients, and caregivers — come together, share information, and work towards common goals. Each of these contextual conditions is needed throughout the child's hospital journey.</p>
+    <p>These results help explain the conditions, beyond resources and workforce, that are needed for responsive care of the critically ill child. <b>Legitimacy</b> refers to whether staff feel allowed and expected to act, and whether emergency care is prioritised. <b>Capability</b> refers to staff confidence, competence, and practical ability to recognise and respond. <b>Connectedness</b> refers to how people — clinical and non-clinical staff, patients, and caregivers — come together, share information, and work towards common goals. These mechanisms are needed throughout the child's hospital journey.</p>
     <div id="conditionsInterpretation"></div>
   </div>
 </section>
@@ -1178,7 +1178,7 @@ document.getElementById('downloadJson').addEventListener('click',()=>download('f
 document.getElementById('downloadCsv').addEventListener('click',()=>download('facility-diagnostic-tool-summary.csv',makeCsv(),'text/csv'));
 document.getElementById('clearAll').addEventListener('click',()=>{ if(confirm('Clear all saved data in this browser?')){ localStorage.removeItem(STORE_KEY); state=defaultState(); activeWardIndex=0; activeRespondentIndex=0; renderAll(); } });
 window.__diagnosticTool = {state, eecc, lccQuestions, calculateFacilityAvailabilityScore, calculateWardReadinessScore, calculateLccSummary, renderAll};
-try { renderAll(); document.getElementById('loadStatus').innerHTML='<div class="instruction-box success-box"><b>Loaded:</b> EECC facility rows 34/34, ward rows 35/35, LCC items 7/7. Single-file v25.</div>'; } catch(e){ console.error(e); document.getElementById('loadStatus').innerHTML=`<div class="instruction-box error-box"><b>Loading error:</b> ${esc(e.message)}</div>`; }
+try { renderAll(); document.getElementById('loadStatus').innerHTML='<div class="instruction-box success-box"><b>Loaded:</b> EECC facility rows 34/34, ward rows 35/35, LCC items 7/7. Single-file v26.</div>'; } catch(e){ console.error(e); document.getElementById('loadStatus').innerHTML=`<div class="instruction-box error-box"><b>Loading error:</b> ${esc(e.message)}</div>`; }
 </script>
 </body>
 </html>
