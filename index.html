@@ -136,6 +136,357 @@ input[type=text],input[type=number],input[type=date],textarea,select{width:100%;
 .priority-callout{border:1px solid #bfdbfe;background:#eff6ff;border-radius:12px;padding:12px;margin:12px 0;}
 .priority-callout h4{margin-top:0;}
 
+
+/* ---- v24 visual refresh -------------------------------------------------- */
+:root{
+  --ink:#172033;
+  --muted:#5b667a;
+  --line:#dce3ee;
+  --page:#f5f7fb;
+  --card:#ffffff;
+  --card-soft:#f9fbff;
+  --brand:#244c7c;
+  --brand-2:#3b82b6;
+  --brand-soft:#eaf3fb;
+  --accent:#0f766e;
+  --shadow-sm:0 1px 2px rgba(15,23,42,.06);
+  --shadow-md:0 10px 28px rgba(15,23,42,.08);
+  --radius:16px;
+}
+*{box-sizing:border-box;}
+body{
+  background:
+    radial-gradient(circle at top left, rgba(59,130,182,.16), transparent 34rem),
+    linear-gradient(180deg,#f8fbff 0%,#f3f6fb 42%,#eef3f8 100%);
+  color:var(--ink);
+  font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  line-height:1.48;
+}
+header{
+  background:linear-gradient(135deg,#14385f 0%,#24527e 50%,#2c7a7b 100%);
+  color:#fff;
+  padding:28px 28px 22px;
+  border-bottom:1px solid rgba(255,255,255,.16);
+  box-shadow:0 12px 30px rgba(15,23,42,.16);
+}
+header h1{
+  font-size:clamp(24px,3vw,38px);
+  line-height:1.08;
+  letter-spacing:-.03em;
+  margin:0 0 10px;
+}
+header p{
+  color:rgba(255,255,255,.86);
+  max-width:980px;
+  margin:0;
+  font-size:15px;
+}
+nav{
+  position:sticky;
+  top:0;
+  z-index:30;
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  padding:12px 22px;
+  background:rgba(255,255,255,.88);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+  box-shadow:var(--shadow-sm);
+}
+.nav-button{
+  border:1px solid var(--line);
+  background:#fff;
+  color:#334155;
+  border-radius:999px;
+  padding:9px 14px;
+  font-weight:700;
+  font-size:13px;
+  transition:all .16s ease;
+}
+.nav-button:hover{
+  border-color:#9cc2df;
+  background:#f3f8fc;
+  transform:translateY(-1px);
+}
+.nav-button.active{
+  color:#fff;
+  border-color:transparent;
+  background:linear-gradient(135deg,#1d4f7a,#0f766e);
+  box-shadow:0 8px 18px rgba(15,118,110,.20);
+}
+main{
+  max-width:1240px;
+  margin:0 auto;
+  padding:24px 18px 42px;
+}
+.page{
+  background:rgba(255,255,255,.76);
+  border:1px solid rgba(220,227,238,.9);
+  border-radius:22px;
+  box-shadow:var(--shadow-md);
+  padding:24px;
+}
+.page h2{
+  font-size:clamp(22px,2.5vw,31px);
+  letter-spacing:-.02em;
+  margin:0 0 16px;
+  color:#18324f;
+}
+.page h3{
+  color:#1f3b58;
+  letter-spacing:-.01em;
+}
+.panel,.step-card,.intervention-card,.context-cell,.phase-box,.context-metric{
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  background:var(--card);
+  box-shadow:var(--shadow-sm);
+}
+.panel{
+  padding:18px;
+  margin:16px 0;
+}
+.panel h3:first-child,.panel h4:first-child{margin-top:0;}
+.instruction-box,.action-empty,.priority-callout{
+  background:linear-gradient(180deg,#f7fbff,#eef6fc);
+  border:1px solid #cfe2f3;
+  border-radius:var(--radius);
+  color:#203047;
+}
+.instruction-box{
+  padding:14px 16px;
+}
+.priority-callout{
+  box-shadow:var(--shadow-sm);
+}
+.muted,.small,.bar-note,.context-score-gap{
+  color:var(--muted);
+}
+button{
+  border:0;
+  border-radius:12px;
+  background:#1d4f7a;
+  color:#fff;
+  padding:9px 14px;
+  font-weight:700;
+  box-shadow:0 6px 14px rgba(29,79,122,.16);
+  transition:all .16s ease;
+}
+button:hover{transform:translateY(-1px);box-shadow:0 10px 20px rgba(29,79,122,.20);}
+button.secondary{
+  color:#1d3b53;
+  background:#eef4f8;
+  border:1px solid #d4e1ea;
+  box-shadow:none;
+}
+button.danger{
+  background:#b91c1c;
+  box-shadow:0 6px 14px rgba(185,28,28,.15);
+}
+.toolbar{
+  align-items:center;
+  gap:10px;
+  padding:12px;
+  background:#f8fafc;
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+}
+input,select,textarea{
+  border:1px solid #cfd8e3;
+  border-radius:10px;
+  background:#fff;
+  padding:8px 10px;
+  color:var(--ink);
+  transition:border-color .16s ease, box-shadow .16s ease;
+}
+input:focus,select:focus,textarea:focus{
+  outline:none;
+  border-color:#3b82b6;
+  box-shadow:0 0 0 3px rgba(59,130,182,.16);
+}
+label{
+  color:#263548;
+  font-weight:650;
+}
+table{
+  border-collapse:separate;
+  border-spacing:0;
+  width:100%;
+  overflow:hidden;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:#fff;
+}
+th{
+  background:#f4f7fb;
+  color:#23364e;
+  font-size:12px;
+  text-transform:none;
+  letter-spacing:.01em;
+}
+th,td{
+  border-bottom:1px solid #e8edf4;
+  padding:10px;
+}
+tr:last-child td{border-bottom:0;}
+tbody tr:hover td{background:#fbfdff;}
+.score-card{
+  border-radius:18px;
+  border:1px solid var(--line);
+  background:linear-gradient(180deg,#fff,#f8fbff);
+  box-shadow:var(--shadow-sm);
+}
+.score-number{
+  color:#173b5c;
+  letter-spacing:-.03em;
+}
+.context-map{
+  border:0;
+  background:transparent;
+}
+.context-title{
+  margin:18px 0 10px;
+  color:#16324d;
+  font-size:15px;
+  font-weight:850;
+  letter-spacing:.01em;
+  text-transform:none;
+}
+.context-summary-grid{
+  gap:12px;
+}
+.context-metric{
+  background:linear-gradient(180deg,#fff,#f7fbff);
+  padding:14px;
+}
+.context-metric .metric-label{
+  color:#334155;
+}
+.context-metric .metric-number{
+  color:#0f3f61;
+  font-size:28px;
+  letter-spacing:-.04em;
+}
+.context-row{
+  gap:12px;
+}
+.context-cell{
+  padding:15px;
+  background:linear-gradient(180deg,#fff,#fbfdff);
+}
+.context-cell.legit{border-top:5px solid var(--blue-strong);}
+.context-cell.cap{border-top:5px solid var(--green-strong);}
+.context-cell.conn{border-top:5px solid var(--purple-strong);}
+.phase-strip{
+  gap:12px;
+}
+.phase-box{
+  background:linear-gradient(180deg,#fff,#f7f8fa);
+  border-top:5px solid var(--grey);
+  padding:14px;
+  color:#273449;
+}
+.phase-box .phase-score,.context-cell .phase-score{
+  color:#173b5c;
+}
+.context-score-track,.bar-track{
+  border-radius:999px;
+  background:#e9eef5;
+  overflow:hidden;
+}
+.context-score-fill,.bar-fill{
+  border-radius:999px;
+}
+.legend{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:8px 10px;
+  display:flex;
+  gap:14px;
+  flex-wrap:wrap;
+  margin-top:12px;
+}
+.step-card{
+  padding:16px;
+  background:linear-gradient(180deg,#fff,#f7fbff);
+}
+.step-card h3{
+  font-size:17px;
+  margin-bottom:8px;
+}
+.intervention-card{
+  padding:16px;
+  background:linear-gradient(180deg,#fff,#fbfdff);
+  box-shadow:var(--shadow-sm);
+}
+.intervention-card.priority-high{
+  border-left:7px solid #d97706;
+  background:linear-gradient(180deg,#fff,#fff8ed);
+}
+.intervention-card.priority-mid{
+  border-left:7px solid #64748b;
+  background:linear-gradient(180deg,#fff,#f8fafc);
+}
+.intervention-card.priority-low{
+  border-left:7px solid #94a3b8;
+}
+.phase-badge,.action-chip,.gap-chip{
+  font-size:12px;
+  letter-spacing:.01em;
+}
+.action-chip{
+  background:#eff6ff;
+  color:#1e3a5f;
+  border:1px solid #bfdbfe;
+  border-radius:999px;
+  padding:3px 9px;
+  font-weight:700;
+}
+.gap-chip.gap-unavailable{
+  background:#fee2e2;
+  border-color:#fecaca;
+  color:#7f1d1d;
+}
+.gap-chip.gap-not-poc{
+  background:#fff3c4;
+  border-color:#fde68a;
+  color:#78350f;
+}
+.gap-chip.gap-inadequate{
+  background:#e7edff;
+  border-color:#c7d2fe;
+  color:#312e81;
+}
+.action-table tr.gap-unavailable td{background:#fffafa;}
+.action-table tr.gap-not-poc td{background:#fffdf4;}
+.action-table tr.gap-inadequate td{background:#fbfcff;}
+.role-score-table th{
+  background:#f4f7fb;
+}
+.lcc-card{
+  border:1px solid var(--line);
+  border-radius:18px;
+  background:#fff;
+  box-shadow:var(--shadow-sm);
+  padding:16px;
+  margin:14px 0;
+}
+.lcc-card h4{
+  font-size:17px;
+  color:#193653;
+}
+@media (max-width:900px){
+  header{padding:22px 18px;}
+  nav{padding:10px;gap:6px;}
+  .nav-button{font-size:12px;padding:8px 10px;}
+  main{padding:14px 10px 28px;}
+  .page{padding:16px;border-radius:18px;}
+  .panel{padding:14px;}
+  table{border-radius:12px;}
+}
+
 </style>
 </head>
 <body>
@@ -179,6 +530,10 @@ input[type=text],input[type=number],input[type=date],textarea,select{width:100%;
     <div class="step-card">
       <h3>Step 4: Interpretation</h3>
       <p>Use the results to identify practical priorities for local action.</p>
+    </div>
+    <div class="step-card">
+      <h3>Step 5: Intervention design</h3>
+      <p>Use the resource and conditions diagnosis to design, adapt, and sequence a small number of locally feasible interventions.</p>
     </div>
   </div>
 </section>
@@ -614,7 +969,7 @@ function renderConditionsInterpretation(lcc){
           <div class="intervention-head">
             <div>
               <span class="phase-badge">Contextual condition: ${esc(x.domain)}</span>
-              <h4>Priority contextual condition for Legitimacy, Capability and Connectedness</h4>
+              <h4>Priority condition to strengthen: ${esc(x.domain)}</h4>
             </div>
             <div class="intervention-score">${scoreIqrText(x.st)} / 5</div>
           </div>
@@ -650,8 +1005,8 @@ function renderConditionsInterpretation(lcc){
     </div>
     ${priorityPhaseHtml}
     <div class="priority-callout">
-      <h4>2. Priority contextual condition for Legitimacy, Capability and Connectedness</h4>
-      <p>Your facility's lowest contextual condition score suggests what may need strengthening for emergency care to happen reliably.</p>
+      <h4>2. Priority condition to strengthen</h4>
+      <p>Your facility's lowest score across Legitimacy, Capability, and Connectedness suggests which condition may need strengthening for emergency care to happen reliably.</p>
     </div>
     ${priorityConditionHtml}
     <div class="priority-callout">
@@ -823,7 +1178,7 @@ document.getElementById('downloadJson').addEventListener('click',()=>download('f
 document.getElementById('downloadCsv').addEventListener('click',()=>download('facility-diagnostic-tool-summary.csv',makeCsv(),'text/csv'));
 document.getElementById('clearAll').addEventListener('click',()=>{ if(confirm('Clear all saved data in this browser?')){ localStorage.removeItem(STORE_KEY); state=defaultState(); activeWardIndex=0; activeRespondentIndex=0; renderAll(); } });
 window.__diagnosticTool = {state, eecc, lccQuestions, calculateFacilityAvailabilityScore, calculateWardReadinessScore, calculateLccSummary, renderAll};
-try { renderAll(); document.getElementById('loadStatus').innerHTML='<div class="instruction-box success-box"><b>Loaded:</b> EECC facility rows 34/34, ward rows 35/35, LCC items 7/7. Single-file v23.</div>'; } catch(e){ console.error(e); document.getElementById('loadStatus').innerHTML=`<div class="instruction-box error-box"><b>Loading error:</b> ${esc(e.message)}</div>`; }
+try { renderAll(); document.getElementById('loadStatus').innerHTML='<div class="instruction-box success-box"><b>Loaded:</b> EECC facility rows 34/34, ward rows 35/35, LCC items 7/7. Single-file v25.</div>'; } catch(e){ console.error(e); document.getElementById('loadStatus').innerHTML=`<div class="instruction-box error-box"><b>Loading error:</b> ${esc(e.message)}</div>`; }
 </script>
 </body>
 </html>
