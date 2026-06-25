@@ -72,6 +72,11 @@ input[type=text],input[type=number],input[type=date],textarea,select{width:100%;
 .context-score-fill.resource{background:#9fb4c0;}
 .context-score-gap{font-size:11px;color:#666;margin-top:3px;}
 
+
+.action-table td, .action-table th{vertical-align:top;}
+.action-chip{display:inline-block;border-radius:999px;padding:2px 8px;background:#f3f4f6;border:1px solid #d1d5db;font-size:12px;}
+.action-empty{padding:12px;border:1px solid #d1d5db;border-radius:10px;background:#f9fafb;}
+
 </style>
 </head>
 <body>
@@ -143,6 +148,10 @@ input[type=text],input[type=number],input[type=date],textarea,select{width:100%;
   <div class="panel"><h3>LCC profile: median and IQR</h3><div id="lccProfile"></div></div>
   <div class="panel"><h3>LCC respondent distribution</h3><div id="respondentDistribution"></div></div>
   <div class="panel"><h3>Initial interpretation</h3><div id="interpretation"></div></div>
+  <div class="panel"><h3>Priority EECC action list</h3>
+    <p class="muted">Generated from EECC availability and ward/bedside readiness items that did not meet the scoring rule. This is intended to show what is needed and where.</p>
+    <div id="eeccActionList"></div>
+  </div>
   <div class="panel export-panel"><h3>Export / reset</h3><button id="downloadJson" type="button">Download JSON</button><button id="downloadCsv" type="button" class="secondary">Download CSV summary</button><button id="clearAll" type="button" class="danger">Clear saved data</button></div>
 </section>
 </main>
@@ -307,6 +316,50 @@ function boxPlot(label, st, cls='') {
   const spreadClass=st.iqr>=1.5?'spread-high':'';
   return `<div class="box-row"><div>${esc(label)}</div><div><div class="box-track"><div class="iqr-box ${cls}" style="left:${q1}%;width:${Math.max(2,q3-q1)}%"></div><div class="median-line" style="left:${med}%"></div></div><div class="scale-labels"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div></div><div class="bar-value ${spreadClass}">${formatScore(st.median)} (${formatScore(st.q1)}–${formatScore(st.q3)})<br><span class="small">n=${st.n}</span></div></div>`;
 }
+
+function actionType(category){
+  return category === 'Human resources & systems' ? 'Workforce / system' : 'Material resource';
+}
+function eeccActionRows(facScore, wardScores){
+  const rows = [];
+  facScore.components.forEach(c => {
+    if(c.earned < c.max){
+      rows.push({
+        where: 'Facility-wide',
+        type: actionType(c.category),
+        category: c.category,
+        item: c.label,
+        need: c.category === 'Human resources & systems'
+          ? 'Needed at facility level or not documented as available.'
+          : 'Not available anywhere in the facility, or grouped item incomplete.'
+      });
+    }
+  });
+  wardScores.forEach((x,i) => {
+    const wardName = x.ward.name || x.ward.profile.ward_unit_name || `Ward/unit ${i+1}`;
+    x.score.components.forEach(c => {
+      if(c.earned < c.max){
+        rows.push({
+          where: wardName,
+          type: actionType(c.category),
+          category: c.category,
+          item: c.label,
+          need: c.category === 'Human resources & systems'
+            ? 'Ward/unit readiness criterion not met.'
+            : 'Not ready at point of care: absent, not always accessible at night, not functioning, or insufficient for ward size.'
+        });
+      }
+    });
+  });
+  return rows;
+}
+function renderEeccActionList(rows){
+  if(!rows.length){
+    return `<div class="action-empty"><b>No EECC action items generated.</b><br><span class="muted">All scored facility availability and ward/bedside readiness components currently meet the scoring criteria.</span></div>`;
+  }
+  return `<table class="action-table"><thead><tr><th>Where</th><th>Type</th><th>Category</th><th>Item / issue</th><th>What is needed</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${esc(r.where)}</td><td><span class="action-chip">${esc(r.type)}</span></td><td>${esc(r.category)}</td><td>${esc(r.item)}</td><td>${esc(r.need)}</td></tr>`).join('')}</tbody></table>`;
+}
+
 function updateDashboard(){
   const a=calculateFacilityAvailabilityScore(); document.getElementById('dashAvailability').textContent=`${a.percent}%`; document.getElementById('dashAvailabilityDetail').textContent=`${a.points}/${a.denominator} points`;
   const wardScores=state.wards.map(w=>({ward:w, score:calculateWardReadinessScore(w)})); const readinessMean=wardScores.length?mean(wardScores.map(x=>x.score.percent)):null;
@@ -327,6 +380,8 @@ function updateDashboard(){
   const earliest=PHASE_ORDER.find(p=>lcc.phaseStats[p].median!=null && lcc.phaseStats[p].median<=2.5); if(earliest) interp += `<p><b>Earliest phase needing attention:</b> ${esc(earliest)}.</p>`;
   const highSpread=[...DOMAIN_ORDER.map(d=>[d,lcc.domainStats[d]]),...PHASE_ORDER.map(p=>[p,lcc.phaseStats[p]])].filter(([_,s])=>s.iqr!=null && s.iqr>=1.5).map(([k])=>k); if(highSpread.length) interp += `<p><b>Useful disagreement for discussion:</b> ${highSpread.join(', ')} show wide respondent spread.</p>`;
   document.getElementById('interpretation').innerHTML=interp;
+  const actionRows = eeccActionRows(a, wardScores);
+  document.getElementById('eeccActionList').innerHTML = renderEeccActionList(actionRows);
 }
 function renderContextMap(facCats,wardCats,lcc){
   const scoreOrZero=(st)=>st&&st.median!=null?st.median/5*100:null;
@@ -406,7 +461,7 @@ document.getElementById('downloadJson').addEventListener('click',()=>download('f
 document.getElementById('downloadCsv').addEventListener('click',()=>download('facility-diagnostic-tool-summary.csv',makeCsv(),'text/csv'));
 document.getElementById('clearAll').addEventListener('click',()=>{ if(confirm('Clear all saved data in this browser?')){ localStorage.removeItem(STORE_KEY); state=defaultState(); activeWardIndex=0; activeRespondentIndex=0; renderAll(); } });
 window.__diagnosticTool = {state, eecc, lccQuestions, calculateFacilityAvailabilityScore, calculateWardReadinessScore, calculateLccSummary, renderAll};
-try { renderAll(); document.getElementById('loadStatus').innerHTML='<div class="instruction-box success-box"><b>Loaded:</b> EECC facility rows 34/34, ward rows 35/35, LCC items 7/7. Single-file v13.</div>'; } catch(e){ console.error(e); document.getElementById('loadStatus').innerHTML=`<div class="instruction-box error-box"><b>Loading error:</b> ${esc(e.message)}</div>`; }
+try { renderAll(); document.getElementById('loadStatus').innerHTML='<div class="instruction-box success-box"><b>Loaded:</b> EECC facility rows 34/34, ward rows 35/35, LCC items 7/7. Single-file v14.</div>'; } catch(e){ console.error(e); document.getElementById('loadStatus').innerHTML=`<div class="instruction-box error-box"><b>Loading error:</b> ${esc(e.message)}</div>`; }
 </script>
 </body>
 </html>
