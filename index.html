@@ -77,6 +77,16 @@ input[type=text],input[type=number],input[type=date],textarea,select{width:100%;
 .action-chip{display:inline-block;border-radius:999px;padding:2px 8px;background:#f3f4f6;border:1px solid #d1d5db;font-size:12px;}
 .action-empty{padding:12px;border:1px solid #d1d5db;border-radius:10px;background:#f9fafb;}
 
+
+.intervention-card{border:1px solid #d1d5db;border-radius:12px;padding:14px;margin:12px 0;background:#fff;}
+.intervention-card.priority-high{border-left:6px solid #b45309;}
+.intervention-card.priority-mid{border-left:6px solid #6b7280;}
+.intervention-card.priority-low{border-left:6px solid #9ca3af;}
+.intervention-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap;}
+.intervention-score{font-weight:700;font-variant-numeric:tabular-nums;text-align:right;}
+.intervention-card ul{margin-top:8px;}
+.phase-badge{display:inline-block;border-radius:999px;padding:3px 9px;background:#f3f4f6;border:1px solid #d1d5db;font-size:12px;font-weight:700;}
+
 </style>
 </head>
 <body>
@@ -87,7 +97,8 @@ input[type=text],input[type=number],input[type=date],textarea,select{width:100%;
 <nav>
   <button class="nav-button active" data-page="resources" type="button">1. Resources</button>
   <button class="nav-button" data-page="lcc" type="button">2. LCC diagnosis</button>
-  <button class="nav-button" data-page="dashboard" type="button">3. Dashboard / diagnosis / interpretation</button>
+  <button class="nav-button" data-page="dashboard" type="button">3. Dashboard</button>
+  <button class="nav-button" data-page="interpretationPage" type="button">4. Interpretation</button>
 </nav>
 <main>
 <div id="loadStatus"></div>
@@ -135,7 +146,7 @@ input[type=text],input[type=number],input[type=date],textarea,select{width:100%;
   <div id="lccItems"></div>
 </section>
 <section id="dashboard" class="page" hidden>
-  <h2>3. Dashboard / diagnosis / interpretation</h2>
+  <h2>3. Dashboard</h2>
   <div class="grid">
     <div class="metric-card"><h3>EECC facility availability</h3><div id="dashAvailability" class="metric-value">—</div><p id="dashAvailabilityDetail" class="muted"></p></div>
     <div class="metric-card"><h3>EECC ward readiness</h3><div id="dashReadiness" class="metric-value">—</div><p id="dashReadinessDetail" class="muted"></p></div>
@@ -154,6 +165,30 @@ input[type=text],input[type=number],input[type=date],textarea,select{width:100%;
   </div>
   <div class="panel export-panel"><h3>Export / reset</h3><button id="downloadJson" type="button">Download JSON</button><button id="downloadCsv" type="button" class="secondary">Download CSV summary</button><button id="clearAll" type="button" class="danger">Clear saved data</button></div>
 </section>
+
+<section id="interpretationPage" class="page" hidden>
+  <h2>4. Interpretation</h2>
+  <p class="muted">This page translates the EECC resource/readiness assessment and LCC contextual diagnosis into practical priorities for local discussion. It is intended as a prioritisation aid, not a fixed intervention package.</p>
+
+  <div class="panel">
+    <h3>EECC resource and workforce action list</h3>
+    <p class="muted">Generated from EECC availability and ward/bedside readiness items that did not meet the scoring rule.</p>
+    <div id="interpEeccActionList"></div>
+  </div>
+
+  <div class="panel">
+    <h3>LCC phase-based intervention map</h3>
+    <p class="muted">Generated from the phase-of-care scores. Lowest-scoring phases are shown first. Suggested interventions are intentionally simple and suitable for generalist, resource-constrained facilities.</p>
+    <div id="lccInterventionMap"></div>
+  </div>
+
+  <div class="panel">
+    <h3>Sequencing principle</h3>
+    <p><b>Start with the earliest weak phase and the simplest feasible intervention.</b> Resource gaps identify what is missing. LCC scores help explain which contextual condition needs strengthening for emergency care to happen reliably.</p>
+    <p class="muted">If respondents disagree widely, use that disagreement as a facilitated discussion trigger before choosing interventions.</p>
+  </div>
+</section>
+
 </main>
 <footer style="padding:18px 28px;color:#666"><p>Local browser storage only. Export data before clearing browser data.</p></footer>
 <script id="embedded-data" type="application/json">{"eecc":{"source_title":"EECC Rapid Health Facility Assessment Tool PART 1 June 2025","part_title":"Part 1: Health facility EECC Resource Availability & Readiness","facility_profile":[{"key":"date","label":"Date for data collection","type":"text"},{"key":"data_collector_name","label":"Data collector name","type":"text"},{"key":"country","label":"Country","type":"text"},{"key":"region","label":"Region","type":"text"},{"key":"district","label":"District","type":"text"},{"key":"health_facility","label":"Health facility","type":"text"},{"key":"level_of_health_facility","label":"Level of health facility","type":"checkboxes","options":["Dispensary","Health Centre","District Hospital","Regional Hospital","National/University Hospital","Other"]},{"key":"designation_of_respondent","label":"Designation of Respondent","help":"(To be responded by facility-in-charge)","type":"text"},{"key":"name_of_respondent","label":"Name of Respondent","type":"text"},{"key":"respondent_telephone","label":"Respondent’s Telephone","help":"(for possible follow-up questions)","type":"text"},{"key":"respondent_email","label":"Respondent’s Email","help":"(for possible follow-up questions)","type":"text"},{"key":"number_of_wards","label":"Number of wards in the facility","type":"number"},{"key":"list_of_wards","label":"List of wards in the facility","type":"textarea"},{"key":"total_beds","label":"Total number of beds in the facility","type":"number"},{"key":"catchment_area","label":"Catchment Area (population)","type":"text"},{"key":"notes_comments","label":"Notes / Comments","type":"textarea"}],"facility_availability":[{"n":1,"item":"ICU","analysis":"If yes to 1,2 OR 3 = 1 point","score_group":"facility_space_or"},{"n":2,"item":"HDU","analysis":"","score_group":"facility_space_or"},{"n":3,"item":"Designated space in any ward for critically ill patients","analysis":"","score_group":"facility_space_or"},{"n":4,"item":"In the Out-Patient Department or Emergency Unit (area of the hospital where patients arrive), there is a designated triage area (area for the identification of critical illness)","analysis":"","score":"single_yes"},{"n":5,"item":"If a critically ill patient arrives to the facility, are they treated before paying","analysis":"","score":"single_yes"},{"n":6,"item":"Blood pressure measuring equipment (eg. sphygmomanometer with a stethoscope)","analysis":"","score":"single_yes"},{"n":7,"item":"Pulse oximeter & probe","analysis":"","score":"single_yes"},{"n":8,"item":"Bag Valve Mask (Ambu-bag or resuscitator) adult size","analysis":"If yes to 8 AND 9 = 1 point","score_group":"facility_8_9_and"},{"n":9,"item":"Bag Valve Mask (Ambu-bag or resuscitator) paediatric size","analysis":"","score_group":"facility_8_9_and"},{"n":10,"item":"Oxygen supply (piped, concentrator or cylinder)","analysis":"","score":"single_yes"},{"n":11,"item":"Flowmeter","analysis":"","score":"single_yes"},{"n":12,"item":"Oxygen tubing","analysis":"","score":"single_yes"},{"n":13,"item":"Suction machine (manual or electronic)","analysis":"","score":"single_yes"},{"n":14,"item":"Suction catheters paediatric size","analysis":"If yes to 14 AND 15 = 1 point","score_group":"facility_14_15_and"},{"n":15,"item":"Suction catheter adult size","analysis":"","score_group":"facility_14_15_and"},{"n":16,"item":"Oxygen face masks of adult size","analysis":"If yes to 16 AND 17 = 1 point","score_group":"facility_16_17_and"},{"n":17,"item":"Oxygen face masks of paediatric size","analysis":"","score_group":"facility_16_17_and"},{"n":18,"item":"Oxygen face masks with reservoir bags (non-rebreather mask) of adult size","analysis":"If yes to 18 AND 19 = 1 point","score_group":"facility_18_19_and"},{"n":19,"item":"Oxygen face masks with reservoir bags (non-rebreather mask) of paediatric size","analysis":"","score_group":"facility_18_19_and"},{"n":20,"item":"Guedel (oro-pharyngeal) airways of adult size","analysis":"If yes to 20 AND 21 = 1 point","score_group":"facility_20_21_and"},{"n":21,"item":"Guedel (oro-pharyngeal) airways of paediatric size","analysis":"","score_group":"facility_20_21_and"},{"n":22,"item":"Intravenous cannulas of adult size","analysis":"If yes to 22 AND 23 = 1 point","score_group":"facility_22_23_and"},{"n":23,"item":"Intravenous cannulas of paediatric size","analysis":"","score_group":"facility_22_23_and"},{"n":24,"item":"Intraosseous cannulas of adult size","analysis":"If yes to 24 AND 25 = 1 point","score_group":"facility_24_25_and"},{"n":25,"item":"Intraosseous cannulas of paediatric size","analysis":"","score_group":"facility_24_25_and"},{"n":26,"item":"Adrenaline","analysis":"","score":"single_yes"},{"n":27,"item":"Oxytocin","analysis":"","score":"single_yes"},{"n":28,"item":"Diazepam (rectal or intravenous) (or other benzodiazepine)","analysis":"","score":"single_yes"},{"n":29,"item":"Ringers lactate or normal saline","analysis":"","score":"single_yes"},{"n":30,"item":"IV Dextrose","analysis":"","score":"single_yes"},{"n":31,"item":"IV giving sets","analysis":"","score":"single_yes"},{"n":32,"item":"Any nurse attended any acute medical training in the past 12 months","analysis":"If yes = 1 point","score":"single_yes","extra_fields":["Total nurses in all wards","Total nurses attended training","Proportion"]},{"n":33,"item":"Guidelines for the identification of critical illness (triage)","analysis":"","score":"single_yes"},{"n":34,"item":"Guidelines for managing critically ill patients or medical emergencies","analysis":"","score":"single_yes"}],"ward_profile":[{"key":"designation_of_respondent","label":"Designation of respondent","help":"(Data to be collected by observing every item on the unit, led by the in-charge of the unit)","type":"textarea"},{"key":"ward_unit_name","label":"Ward/unit name","type":"text"},{"key":"ward_unit_type","label":"Ward/unit type (circle)","type":"radio","options":["Male","Female","Mixed"]},{"key":"specialty","label":"Specialty (circle)","type":"checkboxes","options":["Paediatric","ObsCGyn","Surgical","Medical","General","Emergency Unit","OPD","HDU","ICU","Other"]},{"key":"number_of_beds","label":"Number of beds on ward/unit","type":"number"},{"key":"number_of_patients","label":"Number of patients in the beds on this day","type":"number"},{"key":"patient_categories","label":"Do you ever admit the following patients in your ward?","type":"checkboxes","options":["Adults and those 12 years and above","Children below12yrs","Both"]},{"key":"notes_comments","label":"Notes / Comments","type":"textarea"}],"ward_readiness":[{"n":1,"item":"Blood pressure measuring equipment (eg. sphygmomanometer with a stethoscope)","response_type":"count_frequency","analysis":"If “always” and equal or more than 1 item per 20 beds = 1 point","score":"count_per_20_always"},{"n":2,"item":"Pulse oximeter C probe","response_type":"count_frequency","analysis":"If “always” and equal or more than 1 item per 20 beds = 1 point","score":"count_per_20_always"},{"n":3,"item":"Bag Valve Mask (Ambu-bag or resuscitator) adult size","response_type":"count_frequency","analysis":"If “always” and equal or more than 1 item per 20 beds for 3 AND 4 = 1 point","score_group":"ward_3_4_count_and"},{"n":4,"item":"Bag Valve Mask (Ambu-bag or resuscitator) paediatric size","response_type":"count_frequency","analysis":"","score_group":"ward_3_4_count_and"},{"n":5,"item":"Suction machine(manual or electronic)","response_type":"count_frequency","analysis":"If “always” and equal or more than 1 item per 20 beds = 1 point","score":"count_per_20_always"},{"n":6,"item":"Oxygen supply (piped, concentrator or cylinder)","response_type":"observed_frequency","analysis":"Yes and Always = 1 point","score":"observed_yes_always"},{"n":7,"item":"Flow meter","response_type":"observed_frequency","analysis":"Yes and Always = 1 point","score":"observed_yes_always"},{"n":8,"item":"Oxygen tubing","response_type":"observed_frequency","analysis":"Yes and Always = 1 point","score":"observed_yes_always"},{"n":9,"item":"Suction catheters paediatric size","response_type":"observed_frequency","analysis":"If yes and ‘Always’ for 9 AND 10 = 1 point","score_group":"ward_9_10_and"},{"n":10,"item":"Suction catheter adult size","response_type":"observed_frequency","analysis":"","score_group":"ward_9_10_and"},{"n":11,"item":"Oxygen nasal prongs","response_type":"observed_frequency","analysis":"Yes and Always = 1 point","score":"observed_yes_always"},{"n":12,"item":"Oxygen face masks of adult size","response_type":"observed_frequency","analysis":"If yes and ‘Always’ for 12 AND 13 = 1 point","score_group":"ward_12_13_and"},{"n":13,"item":"Oxygen face masks of paediatric size","response_type":"observed_frequency","analysis":"","score_group":"ward_12_13_and"},{"n":14,"item":"Oxygen face masks with reservoir bags (non-rebreather mask) of adult size","response_type":"observed_frequency","analysis":"If yes and ‘Always’ for 14 AND 15 = 1 point","score_group":"ward_14_15_and"},{"n":15,"item":"Oxygen face masks with reservoir bags (non-rebreather mask) of paediatric size","response_type":"observed_frequency","analysis":"","score_group":"ward_14_15_and"},{"n":16,"item":"Guedel (oro-pharyngeal) airways of adult size","response_type":"observed_frequency","analysis":"If yes and ‘Always’ for 16 AND 17 = 1 point","score_group":"ward_16_17_and"},{"n":17,"item":"Guedel (oro-pharyngeal) airways of paediatric size","response_type":"observed_frequency","analysis":"","score_group":"ward_16_17_and"},{"n":18,"item":"Intravenous cannulas of adult size","response_type":"observed_frequency","analysis":"If yes and ‘Always’ for 18 AND 19 = 1 point","score_group":"ward_18_19_and"},{"n":19,"item":"Intravenous cannulas of paediatric size","response_type":"observed_frequency","analysis":"","score_group":"ward_18_19_and"},{"n":20,"item":"Intraosseous cannulas of adult size","response_type":"observed_frequency","analysis":"If yes and ‘Always’ for 20 AND 21 = 1 point","score_group":"ward_20_21_and"},{"n":21,"item":"Intraosseous cannulas of paediatric size","response_type":"observed_frequency","analysis":"","score_group":"ward_20_21_and"},{"n":22,"item":"Ringers lactate or normal saline","response_type":"observed_frequency","analysis":"Yes and Always = 1 point","score":"observed_yes_always"},{"n":23,"item":"IV Dextrose","response_type":"observed_frequency","analysis":"Yes and Always = 1 point","score":"observed_yes_always"},{"n":24,"item":"IV giving sets","response_type":"observed_frequency","analysis":"Yes and Always = 1 point","score":"observed_yes_always"},{"n":25,"item":"Diazepam (rectal or intravenous) (or other benzodiazepine)","response_type":"observed_frequency","analysis":"Yes and Always = 1 point","score":"observed_yes_always"},{"n":26,"item":"Adrenaline","response_type":"observed_frequency","analysis":"Yes and Always = 1 point","score":"observed_yes_always"},{"n":27,"item":"Oxytocin","response_type":"observed_frequency_optional","analysis":"Note down if not relevant for this ward and do not score (and total possible score will be one less)","score":"observed_yes_always_optional"},{"n":28,"item":"Do you have a routine/policy that vital signs are checked on all inpatients at least once every 24 hours","response_type":"observed_frequency","analysis":"Yes and Always = 1 point","score":"observed_yes_always"},{"n":29,"item":"When you check vital signs do you always include checking all of PR, RR, BP, SpO2, conscious level, airway sounds (eg snoring, gurgling, stridor), temperature","response_type":"observed_frequency","analysis":"If ALL vital signs included “Always” = 1 point","comment_prompt":"Note down which ones they include in their vital signs and which ones not","score":"observed_yes_always"},{"n":30,"item":"Guidelines for the identification of critical illness (triage)?","response_type":"observed_only","analysis":"","score":"observed_yes"},{"n":31,"item":"Guidelines for treating critically ill patients or medical emergencies?","response_type":"observed_only","analysis":"","score":"observed_yes"},{"n":32,"item":"Do you have a system of seeking senior help when a critical patient is identified?","response_type":"observed_only","analysis":"Briefly describe the system reported to be used.","score":"observed_yes"},{"n":33,"item":"How many nurses are on duty in this shift?","response_type":"number_only","analysis":"If >1 nurse per 10 patients = 1","score":"nurse_ratio"},{"n":34,"item":"How many nurses in this shift have attended any acute medical training in the past 12 months?","response_type":"number_only","analysis":"If 1 or more nurse has been trained = 1","score":"trained_nurse"},{"n":35,"item":"If a patient deteriorates and becomes critically ill, they are treated before paying","response_type":"observed_frequency","analysis":"Yes and Always = 1 point","score":"observed_yes_always"}]},"lcc":[{"phase":"ENTRY","cmoc":"CMOC1","prompt":"Is emergency care allowed and expected to interrupt routine pathways and processes?","domain":"Legitimacy","context":"For a sick child arriving at the facility:","anchors":{"1":"The child usually follows routine processes (registration, payment, queue) before assessment","2":"Routine processes are bypassed only when someone notices the child is sick and speaks up","3":"Most staff know sick children should be prioritised, but this varies depending on who is working","4":"There is a shared expectation among staff that sick children follow a prioritised pathway","5":"There is a shared expectation among all staff (clinical and non-clinical), caregivers, and the wider facility community, including reception and security, that sick children are immediately prioritised."}},{"phase":"RECOGNITION","cmoc":"CMOC2","prompt":"Is less visible critical illness made visible?","domain":"Capability","context":"For a sick child:","anchors":{"1":"Serious illness is usually recognised only when the child appears obviously unwell","2":"Some staff recognise serious illness early, but this depends on who assesses the child","3":"Staff use tools or approaches to identify serious illness, but these are inconsistently applied","4":"Most staff use a shared approach to assess for serious illness","5":"There is a reliable approach used by all relevant staff to identify serious illness early, across all shifts and locations"}},{"phase":"RESPONSE","cmoc":"CMOC3","prompt":"Workload competition","domain":"Legitimacy + Capability","context":"When urgent treatment is needed:","anchors":{"1":"Treatment is often delayed because staff are busy with other tasks or responsibilities","2":"Staff recognise urgency and call for help, but competing tasks can delay action","3":"Some staff reprioritise tasks and initiate treatment, depending on experience or confidence","4":"Staff understand they are expected to prioritise urgent treatment over other tasks","5":"There are systems in place that support staff to manage the needs of newly arriving very sick children alongside existing workload"}},{"phase":"RESPONSE","cmoc":"CMOC5","prompt":"Can action happen without a diagnosis?","domain":"Capability","context":"When a child is clearly unwell but investigations are not yet complete:","anchors":{"1":"Treatment almost always waits for investigations or a confirmed diagnosis","2":"Some staff initiate treatment early, but this depends on seniority or individual confidence","3":"Staff know they should treat early, but practice varies depending on who is present","4":"Most staff initiate emergency treatment while investigations are underway","5":"Assessment and treatment happen concurrently as standard practice, regardless of who is present"}},{"phase":"RESPONSE","cmoc":"CMOC4","prompt":"Who has responsibility for what?","domain":"Legitimacy and connectedness","context":"When multiple people are needed to help manage a very sick child:","anchors":{"1":"People complete their own tasks but no one coordinates the response across multiple people","2":"Coordination occurs, but depends on specific individuals or relationships","3":"People communicate and coordinate care, but there are still gaps in responsibility especially after-hours","4":"Roles are clear and staff coordinate effectively across shifts","5":"Team members understand each other's roles and share responsibility for the child's outcome"}},{"phase":"RESPONSE","cmoc":"CMOC6","prompt":"Bounded legitimacy/authority","domain":"Legitimacy","context":"When urgent action is needed immediately:","anchors":{"1":"Staff usually wait for someone with authority before acting","2":"Staff recognise what is needed but mainly escalate to others","3":"Some staff initiate treatment depending on their role, confidence or experience","4":"Staff have clear authority to start agreed emergency actions while escalating","5":"Staff are encouraged to act in an emergency, with supervision and backing of seniors"}},{"phase":"CONTINUITY","cmoc":"CMOC7","prompt":"When does an emergency end?","domain":"Legitimacy + Connectedness","context":"For a child already receiving care:","anchors":{"1":"Deterioration is usually recognised when the child looks worse or someone (including caregivers) raises concern","2":"Some staff routinely reassess and identify deterioration earlier","3":"Staff monitor and escalate concerns, but approaches vary","4":"There are reliable systems for staff to recognise and escalate deterioration","5":"Staff and caregivers are supported to recognise, communicate and escalate deterioration"}}],"version":"v8-higher-bars-better"}</script>
@@ -360,6 +395,89 @@ function renderEeccActionList(rows){
   return `<table class="action-table"><thead><tr><th>Where</th><th>Type</th><th>Category</th><th>Item / issue</th><th>What is needed</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${esc(r.where)}</td><td><span class="action-chip">${esc(r.type)}</span></td><td>${esc(r.category)}</td><td>${esc(r.item)}</td><td>${esc(r.need)}</td></tr>`).join('')}</tbody></table>`;
 }
 
+
+const PHASE_INTERVENTIONS = {
+  'ENTRY': {
+    meaning: 'Sick children may not be reliably prioritised above routine flow, registration, payment, queues, or waiting processes.',
+    interventions: [
+      'Agree a simple “sick child first” rule across clinical and non-clinical staff.',
+      'Orient reception, records, security, cleaners, and porters to obvious danger signs and where to send the child.',
+      'Use simple visual prompts at entry points: not breathing well, unconscious, convulsing, very weak, blue/pale = go straight to clinical staff.',
+      'Agree that payment or registration should not delay first clinical assessment.'
+    ]
+  },
+  'RECOGNITION': {
+    meaning: 'Less visible critical illness may not be reliably detected until the child looks obviously very unwell.',
+    interventions: [
+      'Use a short danger-sign checklist at first contact.',
+      'Make pulse oximetry part of first assessment where available.',
+      'Place respiratory rate, oxygen saturation, conscious level, and danger-sign prompts where children first arrive.',
+      'Use short repeated bedside teaching based on recent local cases rather than one-off classroom training.'
+    ]
+  },
+  'RESPONSE': {
+    meaning: 'Children may be recognised as sick, but urgent treatment may be delayed by workload, uncertainty, limited authority, or waiting for diagnosis or senior review.',
+    interventions: [
+      'Agree which emergency actions can start before diagnosis or senior review: oxygen, glucose, anticonvulsant, antibiotics, and fluids according to local protocol.',
+      'Keep essential emergency items together where sick children are first managed.',
+      'Define a simple call-for-help trigger: who to call, when to call, and how to call.',
+      'Senior staff explicitly back early emergency action while escalation is happening.'
+    ]
+  },
+  'CONTINUITY': {
+    meaning: 'Emergency care may stop after first treatment; deterioration, escalation, and handover may be unreliable.',
+    interventions: [
+      'Create a simple high-risk or watch list for children needing reassessment.',
+      'Agree reassessment triggers for children on oxygen, fluids, anticonvulsants, antibiotics, or awaiting referral.',
+      'Add one handover question: “What are we worried about, and what should trigger escalation?”',
+      'Tell caregivers which signs should prompt them to call staff: worse breathing, reduced alertness, colour change, poor feeding, convulsions, or worsening weakness.'
+    ]
+  }
+};
+
+function phasePriorityLabel(score){
+  if(score == null || Number.isNaN(score)) return {label:'No score yet', cls:'priority-low'};
+  if(score < 2.5) return {label:'Priority phase for intervention', cls:'priority-high'};
+  if(score < 3.5) return {label:'Partial / inconsistent — discuss and strengthen', cls:'priority-mid'};
+  return {label:'Relative strength — maintain and learn from this area', cls:'priority-low'};
+}
+
+function renderLccInterventionMap(lcc){
+  const rows = PHASE_ORDER.map(p => {
+    const st = lcc.phaseStats[p] || {};
+    return {phase:p, score:st.median, q1:st.q1, q3:st.q3, iqr:st.iqr, n:st.n || 0};
+  }).sort((a,b) => {
+    const av = a.score == null ? 99 : a.score;
+    const bv = b.score == null ? 99 : b.score;
+    return av - bv;
+  });
+
+  if(!rows.some(r => r.n > 0)){
+    return `<div class="action-empty"><b>No LCC scores yet.</b><br><span class="muted">Add one or more LCC respondents to generate phase-based intervention suggestions.</span></div>`;
+  }
+
+  return rows.map(r => {
+    const p = phasePriorityLabel(r.score);
+    const info = PHASE_INTERVENTIONS[r.phase];
+    const disagreement = r.iqr != null && r.iqr >= 1.5
+      ? `<p class="small"><b>Discussion trigger:</b> respondents differed substantially on this phase (wide IQR).</p>`
+      : '';
+    return `<div class="intervention-card ${p.cls}">
+      <div class="intervention-head">
+        <div>
+          <span class="phase-badge">${esc(r.phase.charAt(0)+r.phase.slice(1).toLowerCase())}</span>
+          <h4>${esc(p.label)}</h4>
+        </div>
+        <div class="intervention-score">${r.score==null?'—':formatScore(r.score)} / 5 ${r.n?`<br><span class="small">IQR ${formatScore(r.q1)}–${formatScore(r.q3)}, n=${r.n}</span>`:''}</div>
+      </div>
+      <p><b>What this may mean:</b> ${esc(info.meaning)}</p>
+      ${disagreement}
+      <p><b>Simple interventions to discuss locally:</b></p>
+      <ul>${info.interventions.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>
+    </div>`;
+  }).join('');
+}
+
 function updateDashboard(){
   const a=calculateFacilityAvailabilityScore(); document.getElementById('dashAvailability').textContent=`${a.percent}%`; document.getElementById('dashAvailabilityDetail').textContent=`${a.points}/${a.denominator} points`;
   const wardScores=state.wards.map(w=>({ward:w, score:calculateWardReadinessScore(w)})); const readinessMean=wardScores.length?mean(wardScores.map(x=>x.score.percent)):null;
@@ -382,6 +500,8 @@ function updateDashboard(){
   document.getElementById('interpretation').innerHTML=interp;
   const actionRows = eeccActionRows(a, wardScores);
   document.getElementById('eeccActionList').innerHTML = renderEeccActionList(actionRows);
+  if(document.getElementById('interpEeccActionList')) document.getElementById('interpEeccActionList').innerHTML = renderEeccActionList(actionRows);
+  if(document.getElementById('lccInterventionMap')) document.getElementById('lccInterventionMap').innerHTML = renderLccInterventionMap(lcc);
 }
 function renderContextMap(facCats,wardCats,lcc){
   const scoreOrZero=(st)=>st&&st.median!=null?st.median/5*100:null;
@@ -461,7 +581,7 @@ document.getElementById('downloadJson').addEventListener('click',()=>download('f
 document.getElementById('downloadCsv').addEventListener('click',()=>download('facility-diagnostic-tool-summary.csv',makeCsv(),'text/csv'));
 document.getElementById('clearAll').addEventListener('click',()=>{ if(confirm('Clear all saved data in this browser?')){ localStorage.removeItem(STORE_KEY); state=defaultState(); activeWardIndex=0; activeRespondentIndex=0; renderAll(); } });
 window.__diagnosticTool = {state, eecc, lccQuestions, calculateFacilityAvailabilityScore, calculateWardReadinessScore, calculateLccSummary, renderAll};
-try { renderAll(); document.getElementById('loadStatus').innerHTML='<div class="instruction-box success-box"><b>Loaded:</b> EECC facility rows 34/34, ward rows 35/35, LCC items 7/7. Single-file v14.</div>'; } catch(e){ console.error(e); document.getElementById('loadStatus').innerHTML=`<div class="instruction-box error-box"><b>Loading error:</b> ${esc(e.message)}</div>`; }
+try { renderAll(); document.getElementById('loadStatus').innerHTML='<div class="instruction-box success-box"><b>Loaded:</b> EECC facility rows 34/34, ward rows 35/35, LCC items 7/7. Single-file v15.</div>'; } catch(e){ console.error(e); document.getElementById('loadStatus').innerHTML=`<div class="instruction-box error-box"><b>Loading error:</b> ${esc(e.message)}</div>`; }
 </script>
 </body>
 </html>
