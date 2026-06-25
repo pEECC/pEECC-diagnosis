@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Emergency Care Facility Diagnostic Tool</title>
+<style>
+:root{
+  --blue:#e8f2ff; --green:#e9f7ec; --purple:#f3eafa; --grey:#f2f2f2;
+  --border:#d9d9d9; --text:#202124; --muted:#5f6368; --bg:#fafafa; --white:#fff;
+}
+*{box-sizing:border-box}
+body{font-family:Arial,Helvetica,sans-serif;margin:0;background:var(--bg);color:var(--text);line-height:1.4}
+header{background:var(--white);border-bottom:1px solid var(--border);padding:24px 28px}
+h1{margin:0 0 6px;font-size:28px}.subtitle{margin:0;color:var(--muted)}
+nav{position:sticky;top:0;z-index:20;background:var(--white);border-bottom:1px solid var(--border);padding:10px 24px;display:flex;gap:8px;flex-wrap:wrap}
+button{border:1px solid #b8b8b8;background:#fff;border-radius:8px;padding:8px 12px;cursor:pointer}button:hover{background:#f5f5f5}.active{background:#202124;color:#fff}.secondary{background:#f7f7f7}.danger{border-color:#b3261e;color:#b3261e}
+main{max-width:1280px;margin:0 auto;padding:24px}.page{background:#fff;border:1px solid var(--border);border-radius:14px;padding:22px;margin-bottom:24px}.page[hidden]{display:none}
+h2{margin-top:0}h3{margin-top:28px;border-top:1px solid var(--border);padding-top:18px}h4{margin-top:24px}.muted{color:var(--muted)}
+.instruction-box,.score-box{background:#f7f7f7;border-left:4px solid #888;padding:12px 14px;margin:12px 0 18px;border-radius:6px}.error-box{background:#fff3f3;border-left-color:#b3261e}.success-box{background:#f1f8f4;border-left-color:#188038}
+table{width:100%;border-collapse:collapse;margin:12px 0 22px;font-size:14px}th,td{border:1px solid var(--border);padding:8px;vertical-align:top}th{background:#eee;text-align:left}.narrow{width:60px}.medium{width:180px}.analysis{width:230px}.comments{width:260px}
+input[type=text],input[type=number],input[type=date],textarea,select{width:100%;border:1px solid #c7c7c7;border-radius:6px;padding:7px;background:#fff}textarea{min-height:46px}.inline-radio label{display:inline-block;margin-right:10px;white-space:nowrap}.radio-stack label,.checkbox-stack label{display:block;margin:3px 0}.small{font-size:12px;color:var(--muted)}
+.toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:12px 0}.toolbar select{max-width:280px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}.metric-card,.panel,.lcc-card{border:1px solid var(--border);border-radius:12px;padding:14px;background:#fff;margin:12px 0}.metric-value{font-size:34px;font-weight:bold}.score-large{font-size:20px;font-weight:bold}
+.Legitimacy{background:var(--blue)}.Capability{background:var(--green)}.Connectedness{background:var(--purple)}.MixedDomain{background:linear-gradient(90deg,var(--blue),var(--green),var(--purple))}.phase-label{display:inline-block;background:var(--grey);border-radius:999px;padding:3px 9px;margin-right:6px}.domain-label{display:inline-block;border-radius:999px;padding:3px 9px;background:rgba(255,255,255,.7);border:1px solid #ddd}.anchor-table td:first-child{width:50px;text-align:center;font-weight:bold}.lcc-choice{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.lcc-choice label{border:1px solid #ccc;background:#fff;border-radius:8px;padding:6px 10px}.export-panel button{margin-right:8px}.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media (max-width:800px){main{padding:12px}.page{padding:14px}table{font-size:12px;display:block;overflow-x:auto}.two-col{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Emergency Care Facility Diagnostic Tool</h1>
+  <p class="subtitle">EECC resources and readiness + LCC contextual diagnosis</p>
+</header>
+<nav>
+  <button class="nav-button active" data-page="resources" type="button">1. Resources</button>
+  <button class="nav-button" data-page="lcc" type="button">2. LCC diagnosis</button>
+  <button class="nav-button" data-page="dashboard" type="button">3. Dashboard / diagnosis / interpretation</button>
+</nav>
+<main>
+<div id="loadStatus"></div>
+<section id="resources" class="page">
+  <h2>1. Resources</h2>
+  <p>Based on the EECC Rapid Health Facility Assessment Tool PART 1 June 2025: Health facility EECC Resource Availability &amp; Readiness.</p>
+  <button id="saveNowResources" type="button">Save</button>
+  <details class="instruction-box" open>
+    <summary>Method from the EECC tool</summary>
+    <p><b>Facility-level Availability:</b> 10 minutes of questions for the facility in-charge or other knowledgeable person in the facility. Ask the questions, circling “Y” for Yes or “N” for No. Add up points and divide by 25, then multiply by 100.</p>
+    <p><b>Ward/Bedside-level Readiness:</b> 35 items to observe in each ward/unit of the facility together with the ward in-charge. Repeat assessment for each ward/unit. Calculate the facility readiness score by adding up each ward/unit score and dividing by number of wards/units assessed.</p>
+  </details>
+  <h3>FACILITY-LEVEL AVAILABILITY</h3>
+  <div id="facilityProfile"></div>
+  <h4>Does this health facility have the following resource available anywhere in the facility?</h4>
+  <div id="facilityAvailability"></div>
+  <h3>WARD/BEDSIDE-LEVEL READINESS</h3>
+  <p><b>(Visit a ward/unit physically). One of these forms to be filled in for each ward/unit</b></p>
+  <div class="toolbar">
+    <label for="wardSelect">Ward/unit assessment</label>
+    <select id="wardSelect"></select>
+    <button id="addWard" type="button">Add ward/unit</button>
+    <button id="duplicateWard" type="button" class="secondary">Duplicate current</button>
+    <button id="deleteWard" type="button" class="danger">Delete current</button>
+  </div>
+  <div id="wardProfile"></div>
+  <h4>In this ward or unit, observe these items:</h4>
+  <div id="wardReadiness"></div>
+</section>
+<section id="lcc" class="page" hidden>
+  <h2>2. LCC contextual diagnosis</h2>
+  <button id="saveNowLcc" type="button">Save</button>
+  <div id="lccItems"></div>
+</section>
+<section id="dashboard" class="page" hidden>
+  <h2>3. Dashboard / diagnosis / interpretation</h2>
+  <div class="grid">
+    <div class="metric-card"><h3>EECC facility availability</h3><div id="dashAvailability" class="metric-value">—</div><p id="dashAvailabilityDetail" class="muted"></p></div>
+    <div class="metric-card"><h3>EECC ward readiness</h3><div id="dashReadiness" class="metric-value">—</div><p id="dashReadinessDetail" class="muted"></p></div>
+    <div class="metric-card"><h3>LCC mean score</h3><div id="dashLccMean" class="metric-value">—</div><p id="dashLccDetail" class="muted"></p></div>
+  </div>
+  <div class="panel"><h3>Ward readiness scores</h3><div id="wardScoreTable"></div></div>
+  <div class="panel"><h3>LCC profile</h3><div id="lccProfile"></div></div>
+  <div class="panel"><h3>Initial interpretation</h3><div id="interpretation"></div></div>
+  <div class="panel export-panel"><h3>Export / reset</h3><button id="downloadJson" type="button">Download JSON</button><button id="downloadCsv" type="button" class="secondary">Download CSV summary</button><button id="clearAll" type="button" class="danger">Clear saved data</button></div>
+</section>
+</main>
+<footer style="padding:18px 28px;color:#666"><p>Local browser storage only. Export data before clearing browser data.</p></footer>
+<script id="embedded-data" type="application/json">{"eecc":{"source_title":"EECC Rapid Health Facility Assessment Tool PART 1 June 2025","part_title":"Part 1: Health facility EECC Resource Availability & Readiness","facility_profile":[{"key":"date","label":"Date for data collection","type":"text"},{"key":"data_collector_name","label":"Data collector name","type":"text"},{"key":"country","label":"Country","type":"text"},{"key":"region","label":"Region","type":"text"},{"key":"district","label":"District","type":"text"},{"key":"health_facility","label":"Health facility","type":"text"},{"key":"level_of_health_facility","label":"Level of health facility","type":"checkboxes","options":["Dispensary","Health Centre","District Hospital","Regional Hospital","National/University Hospital","Other"]},{"key":"designation_of_respondent","label":"Designation of Respondent","help":"(To be responded by facility-in-charge)","type":"text"},{"key":"name_of_respondent","label":"Name of Respondent","type":"text"},{"key":"respondent_telephone","label":"Respondent’s Telephone","help":"(for possible follow-up questions)","type":"text"},{"key":"respondent_email","label":"Respondent’s Email","help":"(for possible follow-up questions)","type":"text"},{"key":"number_of_wards","label":"Number of wards in the facility","type":"number"},{"key":"list_of_wards","label":"List of wards in the facility","type":"textarea"},{"key":"total_beds","label":"Total number of beds in the facility","type":"number"},{"key":"catchment_area","label":"Catchment Area (population)","type":"text"},{"key":"notes_comments","label":"Notes / Comments","type":"textarea"}],"facility_availability":[{"n":1,"item":"ICU","analysis":"If yes to 1,2 OR 3 = 1 point","score_group":"facility_space_or"},{"n":2,"item":"HDU","analysis":"","score_group":"facility_space_or"},{"n":3,"item":"Designated space in any ward for critically ill patients","analysis":"","score_group":"facility_space_or"},{"n":4,"item":"In the Out-Patient Department or Emergency Unit (area of the hospital where patients arrive), there is a designated triage area (area for the identification of critical illness)","analysis":"","score":"single_yes"},{"n":5,"item":"If a critically ill patient arrives to the facility, are they treated before paying","analysis":"","score":"single_yes"},{"n":6,"item":"Blood pressure measuring equipment (eg. sphygmomanometer with a stethoscope)","analysis":"","score":"single_yes"},{"n":7,"item":"Pulse oximeter & probe","analysis":"","score":"single_yes"},{"n":8,"item":"Bag Valve Mask (Ambu-bag or resuscitator) adult size","analysis":"If yes to 8 AND 9 = 1 point","score_group":"facility_8_9_and"},{"n":9,"item":"Bag Valve Mask (Ambu-bag or resuscitator) paediatric size","analysis":"","score_group":"facility_8_9_and"},{"n":10,"item":"Oxygen supply (piped, concentrator or cylinder)","analysis":"","score":"single_yes"},{"n":11,"item":"Flowmeter","analysis":"","score":"single_yes"},{"n":12,"item":"Oxygen tubing","analysis":"","score":"single_yes"},{"n":13,"item":"Suction machine (manual or electronic)","analysis":"","score":"single_yes"},{"n":14,"item":"Suction catheters paediatric size","analysis":"If yes to 14 AND 15 = 1 point","score_group":"facility_14_15_and"},{"n":15,"item":"Suction catheter adult size","analysis":"","score_group":"facility_14_15_and"},{"n":16,"item":"Oxygen face masks of adult size","analysis":"If yes to 16 AND 17 = 1 point","score_group":"facility_16_17_and"},{"n":17,"item":"Oxygen face masks of paediatric size","analysis":"","score_group":"facility_16_17_and"},{"n":18,"item":"Oxygen face masks with reservoir bags (non-rebreather mask) of adult size","analysis":"If yes to 18 AND 19 = 1 point","score_group":"facility_18_19_and"},{"n":19,"item":"Oxygen face masks with reservoir bags (non-rebreather mask) of paediatric size","analysis":"","score_group":"facility_18_19_and"},{"n":20,"item":"Guedel (oro-pharyngeal) airways of adult size","analysis":"If yes to 20 AND 21 = 1 point","score_group":"facility_20_21_and"},{"n":21,"item":"Guedel (oro-pharyngeal) airways of paediatric size","analysis":"","score_group":"facility_20_21_and"},{"n":22,"item":"Intravenous cannulas of adult size","analysis":"If yes to 22 AND 23 = 1 point","score_group":"facility_22_23_and"},{"n":23,"item":"Intravenous cannulas of paediatric size","analysis":"","score_group":"facility_22_23_and"},{"n":24,"item":"Intraosseous cannulas of adult size","analysis":"If yes to 24 AND 25 = 1 point","score_group":"facility_24_25_and"},{"n":25,"item":"Intraosseous cannulas of paediatric size","analysis":"","score_group":"facility_24_25_and"},{"n":26,"item":"Adrenaline","analysis":"","score":"single_yes"},{"n":27,"item":"Oxytocin","analysis":"","score":"single_yes"},{"n":28,"item":"Diazepam (rectal or intravenous) (or other benzodiazepine)","analysis":"","score":"single_yes"},{"n":29,"item":"Ringers lactate or normal saline","analysis":"","score":"single_yes"},{"n":30,"item":"IV Dextrose","analysis":"","score":"single_yes"},{"n":31,"item":"IV giving sets","analysis":"","score":"single_yes"},{"n":32,"item":"Any nurse attended any acute medical training in the past 12 months","analysis":"If yes = 1 point","score":"single_yes","extra_fields":["Total nurses in all wards","Total nurses attended training","Proportion"]},{"n":33,"item":"Guidelines for the identification of critical illness (triage)","analysis":"","score":"single_yes"},{"n":34,"item":"Guidelines for managing critically ill patients or medical emergencies","analysis":"","score":"single_yes"}],"ward_profile":[{"key":"designation_of_respondent","label":"Designation of respondent","help":"(Data to be collected by observing every item on the unit, led by the in-charge of the unit)","type":"textarea"},{"key":"ward_unit_name","label":"Ward/unit name","type":"text"},{"key":"ward_unit_type","label":"Ward/unit type (circle)","type":"radio","options":["Male","Female","Mixed"]},{"key":"specialty","label":"Specialty (circle)","type":"checkboxes","options":["Paediatric","ObsCGyn","Surgical","Medical","General","Emergency Unit","OPD","HDU","ICU","Other"]},{"key":"number_of_beds","label":"Number of beds on ward/unit","type":"number"},{"key":"number_of_patients","label":"Number of patients in the beds on this day","type":"number"},{"key":"patient_categories","label":"Do you ever admit the following patients in your ward?","type":"checkboxes","options":["Adults and those 12 years and above","Children below12yrs","Both"]},{"key":"notes_comments","label":"Notes / Comments","type":"textarea"}],"ward_readiness":[{"n":1,"item":"Blood pressure measuring equipment (eg. sphygmomanometer with a stethoscope)","response_type":"count_frequency","analysis":"If “always” and equal or more than 1 item per 20 beds = 1 point","score":"count_per_20_always"},{"n":2,"item":"Pulse oximeter C probe","response_type":"count_frequency","analysis":"If “always” and equal or more than 1 item per 20 beds = 1 point","score":"count_per_20_always"},{"n":3,"item":"Bag Valve Mask (Ambu-bag or resuscitator) adult size","response_type":"count_frequency","analysis":"If “always” and equal or more than 1 item per 20 beds for 3 AND 4 = 1 point","score_group":"ward_3_4_count_and"},{"n":4,"item":"Bag Valve Mask (Ambu-bag or resuscitator) paediatric size","response_type":"count_frequency","analysis":"","score_group":"ward_3_4_count_and"},{"n":5,"item":"Suction machine(manual or electronic)","response_type":"count_frequency","analysis":"If “always” and equal or more than 1 item per 20 beds = 1 point","score":"count_per_20_always"},{"n":6,"item":"Oxygen supply (piped, concentrator or cylinder)","response_type":"observed_frequency","analysis":"Yes and Always = 1 point","score":"observed_yes_always"},{"n":7,"item":"Flow meter","response_type":"observed_frequency","analysis":"Yes and Always = 1 point","score":"observed_yes_always"},{"n":8,"item":"Oxygen tubing","response_type":"observed_frequency","analysis":"Yes and Always = 1 point","score":"observed_yes_always"},{"n":9,"item":"Suction catheters paediatric size","response_type":"observed_frequency","analysis":"If yes and ‘Always’ for 9 AND 10 = 1 point","score_group":"ward_9_10_and"},{"n":10,"item":"Suction catheter adult size","response_type":"observed_frequency","analysis":"","score_group":"ward_9_10_and"},{"n":11,"item":"Oxygen nasal prongs","response_type":"observed_frequency","analysis":"Yes and Always = 1 point","score":"observed_yes_always"},{"n":12,"item":"Oxygen face masks of adult size","response_type":"observed_frequency","analysis":"If yes and ‘Always’ for 12 AND 13 = 1 point","score_group":"ward_12_13_and"},{"n":13,"item":"Oxygen face masks of paediatric size","response_type":"observed_frequency","analysis":"","score_group":"ward_12_13_and"},{"n":14,"item":"Oxygen face masks with reservoir bags (non-rebreather mask) of adult size","response_type":"observed_frequency","analysis":"If yes and ‘Always’ for 14 AND 15 = 1 point","score_group":"ward_14_15_and"},{"n":15,"item":"Oxygen face masks with reservoir bags (non-rebreather mask) of paediatric size","response_type":"observed_frequency","analysis":"","score_group":"ward_14_15_and"},{"n":16,"item":"Guedel (oro-pharyngeal) airways of adult size","response_type":"observed_frequency","analysis":"If yes and ‘Always’ for 16 AND 17 = 1 point","score_group":"ward_16_17_and"},{"n":17,"item":"Guedel (oro-pharyngeal) airways of paediatric size","response_type":"observed_frequency","analysis":"","score_group":"ward_16_17_and"},{"n":18,"item":"Intravenous cannulas of adult size","response_type":"observed_frequency","analysis":"If yes and ‘Always’ for 18 AND 19 = 1 point","score_group":"ward_18_19_and"},{"n":19,"item":"Intravenous cannulas of paediatric size","response_type":"observed_frequency","analysis":"","score_group":"ward_18_19_and"},{"n":20,"item":"Intraosseous cannulas of adult size","response_type":"observed_frequency","analysis":"If yes and ‘Always’ for 20 AND 21 = 1 point","score_group":"ward_20_21_and"},{"n":21,"item":"Intraosseous cannulas of paediatric size","response_type":"observed_frequency","analysis":"","score_group":"ward_20_21_and"},{"n":22,"item":"Ringers lactate or normal saline","response_type":"observed_frequency","analysis":"Yes and Always = 1 point","score":"observed_yes_always"},{"n":23,"item":"IV Dextrose","response_type":"observed_frequency","analysis":"Yes and Always = 1 point","score":"observed_yes_always"},{"n":24,"item":"IV giving sets","response_type":"observed_frequency","analysis":"Yes and Always = 1 point","score":"observed_yes_always"},{"n":25,"item":"Diazepam (rectal or intravenous) (or other benzodiazepine)","response_type":"observed_frequency","analysis":"Yes and Always = 1 point","score":"observed_yes_always"},{"n":26,"item":"Adrenaline","response_type":"observed_frequency","analysis":"Yes and Always = 1 point","score":"observed_yes_always"},{"n":27,"item":"Oxytocin","response_type":"observed_frequency_optional","analysis":"Note down if not relevant for this ward and do not score (and total possible score will be one less)","score":"observed_yes_always_optional"},{"n":28,"item":"Do you have a routine/policy that vital signs are checked on all inpatients at least once every 24 hours","response_type":"observed_frequency","analysis":"Yes and Always = 1 point","score":"observed_yes_always"},{"n":29,"item":"When you check vital signs do you always include checking all of PR, RR, BP, SpO2, conscious level, airway sounds (eg snoring, gurgling, stridor), temperature","response_type":"observed_frequency","analysis":"If ALL vital signs included “Always” = 1 point","comment_prompt":"Note down which ones they include in their vital signs and which ones not","score":"observed_yes_always"},{"n":30,"item":"Guidelines for the identification of critical illness (triage)?","response_type":"observed_only","analysis":"","score":"observed_yes"},{"n":31,"item":"Guidelines for treating critically ill patients or medical emergencies?","response_type":"observed_only","analysis":"","score":"observed_yes"},{"n":32,"item":"Do you have a system of seeking senior help when a critical patient is identified?","response_type":"observed_only","analysis":"Briefly describe the system reported to be used.","score":"observed_yes"},{"n":33,"item":"How many nurses are on duty in this shift?","response_type":"number_only","analysis":"If >1 nurse per 10 patients = 1","score":"nurse_ratio"},{"n":34,"item":"How many nurses in this shift have attended any acute medical training in the past 12 months?","response_type":"number_only","analysis":"If 1 or more nurse has been trained = 1","score":"trained_nurse"},{"n":35,"item":"If a patient deteriorates and becomes critically ill, they are treated before paying","response_type":"observed_frequency","analysis":"Yes and Always = 1 point","score":"observed_yes_always"}]},"lcc":[{"phase":"ENTRY","cmoc":"CMOC1","prompt":"Is emergency care allowed and expected to interrupt routine pathways and processes?","domain":"Legitimacy","context":"For a sick child arriving at the facility:","anchors":{"1":"The child usually follows routine processes (registration, payment, queue) before assessment","2":"Routine processes are bypassed only when someone notices the child is sick and speaks up","3":"Most staff know sick children should be prioritised, but this varies depending on who is working","4":"There is a shared expectation among staff that sick children follow a prioritised pathway","5":"There is a shared expectation among all staff (clinical and non-clinical), caregivers, and the wider facility community, including reception and security, that sick children are immediately prioritised."}},{"phase":"RECOGNITION","cmoc":"CMOC2","prompt":"Is less visible critical illness made visible?","domain":"Capability","context":"For a sick child:","anchors":{"1":"Serious illness is usually recognised only when the child appears obviously unwell","2":"Some staff recognise serious illness early, but this depends on who assesses the child","3":"Staff use tools or approaches to identify serious illness, but these are inconsistently applied","4":"Most staff use a shared approach to assess for serious illness","5":"There is a reliable approach used by all relevant staff to identify serious illness early, across all shifts and locations"}},{"phase":"RESPONSE","cmoc":"CMOC3","prompt":"Workload competition","domain":"Legitimacy + Capability","context":"When urgent treatment is needed:","anchors":{"1":"Treatment is often delayed because staff are busy with other tasks or responsibilities","2":"Staff recognise urgency and call for help, but competing tasks can delay action","3":"Some staff reprioritise tasks and initiate treatment, depending on experience or confidence","4":"Staff understand they are expected to prioritise urgent treatment over other tasks","5":"There are systems in place that support staff to manage the needs of newly arriving very sick children alongside existing workload"}},{"phase":"RESPONSE","cmoc":"CMOC5","prompt":"Can action happen without a diagnosis?","domain":"Capability","context":"When a child is clearly unwell but investigations are not yet complete:","anchors":{"1":"Treatment almost always waits for investigations or a confirmed diagnosis","2":"Some staff initiate treatment early, but this depends on seniority or individual confidence","3":"Staff know they should treat early, but practice varies depending on who is present","4":"Most staff initiate emergency treatment while investigations are underway","5":"Assessment and treatment happen concurrently as standard practice, regardless of who is present"}},{"phase":"RESPONSE","cmoc":"CMOC4","prompt":"Who has responsibility for what?","domain":"Legitimacy and connectedness","context":"When multiple people are needed to help manage a very sick child:","anchors":{"1":"People complete their own tasks but no one coordinates the response across multiple people","2":"Coordination occurs, but depends on specific individuals or relationships","3":"People communicate and coordinate care, but there are still gaps in responsibility especially after-hours","4":"Roles are clear and staff coordinate effectively across shifts","5":"Team members understand each other's roles and share responsibility for the child's outcome"}},{"phase":"RESPONSE","cmoc":"CMOC6","prompt":"Bounded legitimacy/authority","domain":"Legitimacy","context":"When urgent action is needed immediately:","anchors":{"1":"Staff usually wait for someone with authority before acting","2":"Staff recognise what is needed but mainly escalate to others","3":"Some staff initiate treatment depending on their role, confidence or experience","4":"Staff have clear authority to start agreed emergency actions while escalating","5":"Staff are encouraged to act in an emergency, with supervision and backing of seniors"}},{"phase":"CONTINUITY","cmoc":"CMOC7","prompt":"When does an emergency end?","domain":"Legitimacy + Connectedness","context":"For a child already receiving care:","anchors":{"1":"Deterioration is usually recognised when the child looks worse or someone (including caregivers) raises concern","2":"Some staff routinely reassess and identify deterioration earlier","3":"Staff monitor and escalate concerns, but approaches vary","4":"There are reliable systems for staff to recognise and escalate deterioration","5":"Staff and caregivers are supported to recognise, communicate and escalate deterioration"}}],"version":"v5-single-file"}</script>
+<script>
+const DATA = JSON.parse(document.getElementById('embedded-data').textContent);
+const eecc = DATA.eecc;
+const lccQuestions = DATA.lcc;
+const STORE_KEY = 'emergency_care_facility_diagnostic_tool_v5_single_file';
+const FREQ = ['Always','Usually','Rarely','Never'];
+const PHASE_ORDER = ['ENTRY','RECOGNITION','RESPONSE','CONTINUITY','ESCALATION'];
+let activeWardIndex = 0;
+let state = loadState();
+
+function defaultState(){ return {facility:{profile:{},availability:{}}, wards:[newWard('Ward/unit 1')], lcc:{}}; }
+function newWard(name){ return {id:`ward_${Date.now()}_${Math.random().toString(16).slice(2)}`, name, profile:{ward_unit_name:name}, readiness:{}}; }
+function loadState(){
+  try{ const raw=localStorage.getItem(STORE_KEY); if(!raw) return defaultState(); const parsed=JSON.parse(raw);
+    parsed.facility ||= {profile:{},availability:{}}; parsed.facility.profile ||= {}; parsed.facility.availability ||= {}; parsed.wards ||= [newWard('Ward/unit 1')]; if(!parsed.wards.length) parsed.wards=[newWard('Ward/unit 1')]; parsed.lcc ||= {}; return parsed;
+  }catch(e){ console.error(e); return defaultState(); }
+}
+function saveState(){ localStorage.setItem(STORE_KEY, JSON.stringify(state)); updateDashboard(); }
+function esc(v){ return String(v ?? '').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;'); }
+function getWard(){ if(!state.wards[activeWardIndex]) activeWardIndex=0; return state.wards[activeWardIndex]; }
+function getByPath(obj,path,fallback=''){ let r=obj; for(const k of path){ if(r==null || r[k]==null) return fallback; r=r[k]; } return r; }
+function setByPath(obj,path,value){ let r=obj; for(let i=0;i<path.length-1;i++){ r[path[i]] ||= {}; r=r[path[i]]; } r[path[path.length-1]]=value; }
+function fieldName(prefix,key){ return `${prefix}__${key}`; }
+function renderInput(path, value, type='text', extra='') { return `<input ${extra} data-path="${esc(path)}" type="${esc(type)}" value="${esc(value)}">`; }
+function renderTextarea(path, value) { return `<textarea data-path="${esc(path)}">${esc(value)}</textarea>`; }
+function renderSelect(path, value, options, blank=true){ return `<select data-path="${esc(path)}">${blank?'<option value=""></option>':''}${options.map(o=>`<option value="${esc(o)}" ${value===o?'selected':''}>${esc(o)}</option>`).join('')}</select>`; }
+function renderRadio(path, value, options, stack=false){ const cls=stack?'radio-stack':'inline-radio'; return `<div class="${cls}">${options.map(o=>`<label><input type="radio" data-path="${esc(path)}" name="${esc(path)}" value="${esc(o)}" ${value===o?'checked':''}> ${esc(o)}</label>`).join('')}</div>`; }
+function renderCheckboxes(path, value, options){ const vals=Array.isArray(value)?value:[]; return `<div class="checkbox-stack">${options.map(o=>`<label><input type="checkbox" data-path="${esc(path)}" name="${esc(path)}" value="${esc(o)}" ${vals.includes(o)?'checked':''}> ${esc(o)}</label>`).join('')}</div>`; }
+function renderYN(path, value){ return renderRadio(path, value, ['Y','N']); }
+function renderField(field, path, value){
+  if(field.type==='textarea') return renderTextarea(path, value);
+  if(field.type==='number') return renderInput(path, value, 'number');
+  if(field.type==='date') return renderInput(path, value, 'date');
+  if(field.type==='radio') return renderRadio(path, value, field.options || [], true);
+  if(field.type==='checkboxes') return renderCheckboxes(path, value, field.options || []);
+  return renderInput(path, value, 'text');
+}
+function pathRoot(path){ return path.split('.')[0]; }
+function stateTarget(path){ if(pathRoot(path)==='facility') return state; if(pathRoot(path)==='ward') return getWard(); if(pathRoot(path)==='lcc') return state; return state; }
+function setStatePath(path, value){
+  if(path.startsWith('ward.')) setByPath(getWard(), path.replace(/^ward\./,'').split('.'), value);
+  else setByPath(state, path.split('.'), value);
+}
+function getStatePath(path, fallback=''){
+  if(path.startsWith('ward.')) return getByPath(getWard(), path.replace(/^ward\./,'').split('.'), fallback);
+  return getByPath(state, path.split('.'), fallback);
+}
+
+function renderFacilityProfile(){
+  const rows = eecc.facility_profile.map(f=>`<tr><th>${esc(f.label)}${f.help?`<div class="small">${esc(f.help)}</div>`:''}</th><td>${renderField(f,`facility.profile.${f.key}`, state.facility.profile[f.key])}</td></tr>`).join('');
+  document.getElementById('facilityProfile').innerHTML = `<table><tbody>${rows}</tbody></table>`;
+}
+function renderFacilityAvailability(){
+  const rows = eecc.facility_availability.map(row=>{
+    const item = state.facility.availability[row.n] || {};
+    const extra = (row.extra_fields||[]).map(label=>{ const key=label.toLowerCase().replaceAll(' ','_'); return `<label class="small">${esc(label)} ${renderInput(`facility.availability.${row.n}.${key}`, item[key], key==='proportion'?'text':'number')}</label>`; }).join('<br>');
+    return `<tr><td class="narrow">${row.n}</td><td>${esc(row.item)}${extra?`<div class="small">${extra}</div>`:''}</td><td class="medium">${renderYN(`facility.availability.${row.n}.available`, item.available)}</td><td class="comments">${renderTextarea(`facility.availability.${row.n}.comments`, item.comments)}</td><td class="analysis">${esc(row.analysis||'')}</td></tr>`;
+  }).join('');
+  const s=calculateFacilityAvailabilityScore();
+  document.getElementById('facilityAvailability').innerHTML = `<table><thead><tr><th></th><th>Item</th><th>Available<br><span class="small">(circle Yes or No)</span></th><th>Comments</th><th>Analysis<br><span class="small">(yes = 1 point)</span></th></tr></thead><tbody>${rows}</tbody></table><div class="score-box"><span class="score-large">Points: ${s.points} / ${s.denominator}</span><br>Points divided by 25 multiplied by 100 = <b>AVAILABILITY SCORE: ${s.percent}%</b></div>`;
+}
+function renderWardSelect(){
+  const select=document.getElementById('wardSelect');
+  select.innerHTML=state.wards.map((w,i)=>`<option value="${i}" ${i===activeWardIndex?'selected':''}>${esc(w.name || w.profile.ward_unit_name || `Ward/unit ${i+1}`)}</option>`).join('');
+}
+function renderWardProfile(){
+  const ward=getWard();
+  const rows = eecc.ward_profile.map(f=>`<tr><th>${esc(f.label)}${f.help?`<div class="small">${esc(f.help)}</div>`:''}</th><td>${renderField(f,`ward.profile.${f.key}`, ward.profile[f.key])}</td></tr>`).join('');
+  document.getElementById('wardProfile').innerHTML = `<table><tbody>${rows}</tbody></table>`;
+}
+function renderWardReadiness(){
+  const ward=getWard();
+  const rows = eecc.ward_readiness.map(row=>{
+    const r = ward.readiness[row.n] || {};
+    const base = `ward.readiness.${row.n}`;
+    let countObs='', countFunc='', observed='', freq='', notRelevant='';
+    if(row.response_type==='count_frequency'){
+      countObs=renderInput(`${base}.count_observed`, r.count_observed, 'number');
+      countFunc=renderInput(`${base}.count_functioning`, r.count_functioning, 'number');
+      freq=renderSelect(`${base}.night_availability`, r.night_availability, FREQ);
+    } else if(row.response_type==='observed_frequency' || row.response_type==='observed_frequency_optional'){
+      observed=renderYN(`${base}.observed`, r.observed);
+      freq=renderSelect(`${base}.night_availability`, r.night_availability, FREQ);
+      if(row.response_type==='observed_frequency_optional') notRelevant=`<label class="small"><input type="checkbox" data-path="${base}.not_relevant" ${r.not_relevant?'checked':''}> Not relevant for this ward/unit</label>`;
+    } else if(row.response_type==='observed_only'){
+      observed=renderYN(`${base}.observed`, r.observed);
+    } else if(row.response_type==='number_only'){
+      observed=renderInput(`${base}.number`, r.number, 'number');
+    }
+    const commentHelp = row.comment_prompt ? `<div class="small">${esc(row.comment_prompt)}</div>` : '';
+    return `<tr><td class="narrow">${row.n}</td><td>${esc(row.item)}${notRelevant?`<div>${notRelevant}</div>`:''}</td><td>${countObs}</td><td>${countFunc}</td><td>${observed}</td><td>${freq}</td><td class="comments">${commentHelp}${renderTextarea(`${base}.comments`, r.comments)}</td><td class="analysis">${esc(row.analysis||'')}</td></tr>`;
+  }).join('');
+  const s=calculateWardReadinessScore(ward);
+  document.getElementById('wardReadiness').innerHTML = `<table><thead><tr><th></th><th>Item</th><th>Count number of items observed</th><th>Count number of items that are functioning<br><span class="small">(check them)</span></th><th>Observed</th><th>Is this item available for the nurse in the ward during the night without needing assistance or to go anywhere else<br><span class="small">(circle the response)</span></th><th>Comments</th><th>Analysis</th></tr></thead><tbody>${rows}</tbody></table><div class="score-box"><span class="score-large">Points: ${s.points} / ${s.denominator}</span><br>Points divided by ${s.denominator} multiplied by 100 = <b>READINESS SCORE: ${s.percent}%</b></div>`;
+}
+function domainClass(domain){ const d=domain.toLowerCase(); if(d.includes('+') || d.includes(' and ')) return 'MixedDomain'; if(d.includes('legitimacy')) return 'Legitimacy'; if(d.includes('capability')) return 'Capability'; if(d.includes('connectedness')) return 'Connectedness'; return ''; }
+function renderLcc(){
+  const cards = lccQuestions.map((q,i)=>{
+    const item=state.lcc[i] || {}; const anchors=Object.entries(q.anchors).map(([score,text])=>`<tr><td>${score}</td><td>${esc(text)}</td></tr>`).join('');
+    const choices=[1,2,3,4,5].map(v=>`<label><input type="radio" data-path="lcc.${i}.score" name="lcc_score_${i}" value="${v}" ${String(item.score)===String(v)?'checked':''}> ${v}</label>`).join('');
+    return `<div class="lcc-card ${domainClass(q.domain)}"><p><span class="phase-label">${esc(q.phase)}</span><span class="domain-label">Domain: ${esc(q.domain)}</span></p><h3>${esc(q.cmoc)}: ${esc(q.prompt)}</h3><p><b>${esc(q.context)}</b></p><table class="anchor-table"><tbody>${anchors}</tbody></table><div class="two-col"><div><b>Selected score</b><div class="lcc-choice">${choices}</div></div><div><b>Evidence / comments</b>${renderTextarea(`lcc.${i}.comments`, item.comments)}</div></div></div>`;
+  }).join('');
+  document.getElementById('lccItems').innerHTML = cards;
+}
+
+function yesFacility(n){ return getByPath(state,['facility','availability',String(n),'available'])==='Y' || getByPath(state,['facility','availability',n,'available'])==='Y'; }
+function calculateFacilityAvailabilityScore(){
+  let points=0;
+  if([1,2,3].some(yesFacility)) points++;
+  [4,5,6,7,10,11,12,13,26,27,28,29,30,31,32,33,34].forEach(n=>{ if(yesFacility(n)) points++; });
+  [[8,9],[14,15],[16,17],[18,19],[20,21],[22,23],[24,25]].forEach(pair=>{ if(pair.every(yesFacility)) points++; });
+  return {points, denominator:25, percent:Math.round(points/25*100)};
+}
+function wardVal(ward,n,key){ return getByPath(ward,['readiness',String(n),key], getByPath(ward,['readiness',n,key], '')); }
+function wardBeds(ward){ const beds=parseFloat(ward.profile.number_of_beds || 0); return beds>0?beds:20; }
+function requiredPer20(ward){ return Math.max(1, Math.ceil(wardBeds(ward)/20)); }
+function countOk(ward,n){ return (parseFloat(wardVal(ward,n,'count_functioning')||0) >= requiredPer20(ward)) && wardVal(ward,n,'night_availability')==='Always'; }
+function obsAlways(ward,n){ return wardVal(ward,n,'observed')==='Y' && wardVal(ward,n,'night_availability')==='Always'; }
+function obsYes(ward,n){ return wardVal(ward,n,'observed')==='Y'; }
+function calculateWardReadinessScore(ward){
+  let points=0; let denominator=28;
+  [1,2,5].forEach(n=>{ if(countOk(ward,n)) points++; });
+  if(countOk(ward,3) && countOk(ward,4)) points++;
+  [6,7,8,11,22,23,24,25,26,28,29,35].forEach(n=>{ if(obsAlways(ward,n)) points++; });
+  [[9,10],[12,13],[14,15],[16,17],[18,19],[20,21]].forEach(pair=>{ if(pair.every(n=>obsAlways(ward,n))) points++; });
+  if(wardVal(ward,27,'not_relevant')) denominator--; else if(obsAlways(ward,27)) points++;
+  [30,31,32].forEach(n=>{ if(obsYes(ward,n)) points++; });
+  const patients=parseFloat(ward.profile.number_of_patients || 0); const nurses=parseFloat(wardVal(ward,33,'number')||0); if(patients>0 && nurses > patients/10) points++;
+  if(parseFloat(wardVal(ward,34,'number')||0) >= 1) points++;
+  const percent = denominator>0 ? Math.round(points/denominator*100) : 0;
+  return {points, denominator, percent};
+}
+function calculateLccSummary(){
+  const scores=lccQuestions.map((q,i)=>({q, score:parseFloat(getByPath(state,['lcc',String(i),'score'], getByPath(state,['lcc',i,'score'], '')))})).filter(x=>!Number.isNaN(x.score));
+  const overall=scores.length ? scores.reduce((a,b)=>a+b.score,0)/scores.length : null;
+  const byPhase={}; const byDomain={Legitimacy:[], Capability:[], Connectedness:[]};
+  scores.forEach(({q,score})=>{ (byPhase[q.phase] ||= []).push(score); const d=q.domain.toLowerCase(); if(d.includes('legitimacy')) byDomain.Legitimacy.push(score); if(d.includes('capability')) byDomain.Capability.push(score); if(d.includes('connectedness')) byDomain.Connectedness.push(score); });
+  const mean = arr => arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : null;
+  return {scores, overall, byPhase:Object.fromEntries(Object.entries(byPhase).map(([k,v])=>[k,mean(v)])), byDomain:Object.fromEntries(Object.entries(byDomain).map(([k,v])=>[k,mean(v)]))};
+}
+function fmtPercent(v){ return v==null?'—':`${Math.round(v)}%`; }
+function fmtScore(v){ return v==null?'—':v.toFixed(1); }
+function updateDashboard(){
+  const a=calculateFacilityAvailabilityScore(); document.getElementById('dashAvailability').textContent=`${a.percent}%`; document.getElementById('dashAvailabilityDetail').textContent=`${a.points}/${a.denominator} points`;
+  const wardScores=state.wards.map(w=>({ward:w, score:calculateWardReadinessScore(w)}));
+  const readinessMean=wardScores.length ? wardScores.reduce((sum,x)=>sum+x.score.percent,0)/wardScores.length : null;
+  document.getElementById('dashReadiness').textContent=fmtPercent(readinessMean); document.getElementById('dashReadinessDetail').textContent=`${wardScores.length} ward/unit assessment${wardScores.length===1?'':'s'}`;
+  const lcc=calculateLccSummary(); document.getElementById('dashLccMean').textContent=fmtScore(lcc.overall); document.getElementById('dashLccDetail').textContent=`${lcc.scores.length}/${lccQuestions.length} LCC items scored`;
+  document.getElementById('wardScoreTable').innerHTML = `<table><thead><tr><th>Ward/unit</th><th>Points</th><th>Denominator</th><th>Readiness score</th></tr></thead><tbody>${wardScores.map((x,i)=>`<tr><td>${esc(x.ward.name || x.ward.profile.ward_unit_name || `Ward/unit ${i+1}`)}</td><td>${x.score.points}</td><td>${x.score.denominator}</td><td>${x.score.percent}%</td></tr>`).join('')}</tbody></table>`;
+  const domains=lcc.byDomain; const phases=lcc.byPhase;
+  document.getElementById('lccProfile').innerHTML = `<div class="grid"><div class="metric-card Legitimacy"><h4>Legitimacy</h4><div class="metric-value">${fmtScore(domains.Legitimacy)}</div></div><div class="metric-card Capability"><h4>Capability</h4><div class="metric-value">${fmtScore(domains.Capability)}</div></div><div class="metric-card Connectedness"><h4>Connectedness</h4><div class="metric-value">${fmtScore(domains.Connectedness)}</div></div></div><h4>Phase scores</h4><table><thead><tr><th>Phase</th><th>Mean score</th></tr></thead><tbody>${PHASE_ORDER.filter(p=>phases[p]!=null).map(p=>`<tr><td>${esc(p)}</td><td>${fmtScore(phases[p])}</td></tr>`).join('')}</tbody></table>`;
+  let interp='';
+  if(a.percent < 70) interp += '<p><b>Resource availability constraint:</b> Facility-level EECC resources appear incomplete. Start with resource availability before over-interpreting LCC scores.</p>';
+  else if(readinessMean!=null && readinessMean < 70) interp += '<p><b>Point-of-care readiness constraint:</b> resources may exist in the facility but are not reliably ready at ward/bedside level.</p>';
+  else interp += '<p><b>Contextual diagnosis priority:</b> EECC availability/readiness appear relatively strong. If care is still delayed, examine LCC conditions.</p>';
+  const low=lcc.scores.filter(x=>x.score<=2); if(low.length) interp += `<p><b>Low LCC items:</b> ${low.map(x=>`${esc(x.q.phase)} ${esc(x.q.cmoc)}`).join(', ')}.</p>`;
+  const earliest=PHASE_ORDER.find(p=>lcc.scores.some(x=>x.q.phase===p && x.score<=2)); if(earliest) interp += `<p><b>Earliest phase needing attention:</b> ${esc(earliest)}.</p>`;
+  document.getElementById('interpretation').innerHTML=interp;
+}
+
+function renderAll(){ renderFacilityProfile(); renderFacilityAvailability(); renderWardSelect(); renderWardProfile(); renderWardReadiness(); renderLcc(); updateDashboard(); }
+function syncWardName(){ const w=getWard(); w.name=w.profile.ward_unit_name || w.name || `Ward/unit ${activeWardIndex+1}`; renderWardSelect(); }
+function download(filename, content, type){ const blob=new Blob([content],{type}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=filename; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); }
+function csvEscape(v){ const s=String(v ?? ''); return /[",\n]/.test(s) ? `"${s.replaceAll('"','""')}"` : s; }
+function makeCsv(){ const rows=[['section','name','points_or_score','denominator','percent_or_mean']]; const a=calculateFacilityAvailabilityScore(); rows.push(['facility_availability','Availability',a.points,a.denominator,a.percent]); state.wards.forEach((w,i)=>{ const s=calculateWardReadinessScore(w); rows.push(['ward_readiness',w.name||`Ward/unit ${i+1}`,s.points,s.denominator,s.percent]); }); const l=calculateLccSummary(); rows.push(['lcc','Mean','','',l.overall==null?'':l.overall.toFixed(2)]); return rows.map(r=>r.map(csvEscape).join(',')).join('\n'); }
+
+document.addEventListener('input', e=>{
+  const el=e.target; const path=el.dataset.path; if(!path) return;
+  if(el.type==='radio') return;
+  let val = el.type==='checkbox' ? el.checked : el.value;
+  if(el.type==='checkbox' && el.name){ /* handled on change */ }
+  setStatePath(path,val); if(path==='ward.profile.ward_unit_name') syncWardName(); saveState();
+});
+document.addEventListener('change', e=>{
+  const el=e.target; const path=el.dataset.path; if(!path) return;
+  if(el.type==='checkbox' && el.name && document.querySelectorAll(`input[name="${CSS.escape(el.name)}"]`).length>1){
+    const vals=Array.from(document.querySelectorAll(`input[name="${CSS.escape(el.name)}"]:checked`)).map(x=>x.value); setStatePath(path, vals);
+  } else if(el.type==='checkbox') setStatePath(path, el.checked);
+  else if(el.type==='radio') setStatePath(path, el.value);
+  else setStatePath(path, el.value);
+  if(path==='ward.profile.ward_unit_name') syncWardName(); saveState();
+  // Re-render scoring tables after changes that affect visible points/denominators.
+  if(path.startsWith('facility.availability')) renderFacilityAvailability();
+  if(path.startsWith('ward.readiness') || path==='ward.profile.number_of_beds' || path==='ward.profile.number_of_patients') renderWardReadiness();
+});
+
+document.querySelectorAll('.nav-button').forEach(btn=>btn.addEventListener('click',()=>{ document.querySelectorAll('.nav-button').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); document.querySelectorAll('.page').forEach(p=>p.hidden=true); document.getElementById(btn.dataset.page).hidden=false; updateDashboard(); }));
+document.getElementById('wardSelect').addEventListener('change', e=>{ activeWardIndex=Number(e.target.value); renderWardSelect(); renderWardProfile(); renderWardReadiness(); updateDashboard(); });
+document.getElementById('addWard').addEventListener('click',()=>{ state.wards.push(newWard(`Ward/unit ${state.wards.length+1}`)); activeWardIndex=state.wards.length-1; saveState(); renderWardSelect(); renderWardProfile(); renderWardReadiness(); });
+document.getElementById('duplicateWard').addEventListener('click',()=>{ const copy=JSON.parse(JSON.stringify(getWard())); copy.id=`ward_${Date.now()}_${Math.random().toString(16).slice(2)}`; copy.name=`${copy.name || copy.profile.ward_unit_name || 'Ward/unit'} copy`; copy.profile.ward_unit_name=copy.name; state.wards.push(copy); activeWardIndex=state.wards.length-1; saveState(); renderWardSelect(); renderWardProfile(); renderWardReadiness(); });
+document.getElementById('deleteWard').addEventListener('click',()=>{ if(state.wards.length<=1){ alert('At least one ward/unit assessment is required.'); return; } if(!confirm('Delete current ward/unit assessment?')) return; state.wards.splice(activeWardIndex,1); activeWardIndex=Math.max(0,activeWardIndex-1); saveState(); renderWardSelect(); renderWardProfile(); renderWardReadiness(); });
+document.getElementById('saveNowResources').addEventListener('click',()=>{ saveState(); alert('Saved in this browser.'); });
+document.getElementById('saveNowLcc').addEventListener('click',()=>{ saveState(); alert('Saved in this browser.'); });
+document.getElementById('downloadJson').addEventListener('click',()=>download('facility-diagnostic-tool-data.json',JSON.stringify(state,null,2),'application/json'));
+document.getElementById('downloadCsv').addEventListener('click',()=>download('facility-diagnostic-tool-summary.csv',makeCsv(),'text/csv'));
+document.getElementById('clearAll').addEventListener('click',()=>{ if(confirm('Clear all saved data in this browser?')){ localStorage.removeItem(STORE_KEY); state=defaultState(); activeWardIndex=0; renderAll(); } });
+
+window.__diagnosticTool = {state, eecc, lccQuestions, calculateFacilityAvailabilityScore, calculateWardReadinessScore, calculateLccSummary, renderAll};
+try { renderAll(); document.getElementById('loadStatus').innerHTML='<div class="instruction-box success-box"><b>Loaded:</b> EECC facility rows 34/34, ward rows 35/35, LCC items 7/7.</div>'; } catch(e){ console.error(e); document.getElementById('loadStatus').innerHTML=`<div class="instruction-box error-box"><b>Loading error:</b> ${esc(e.message)}</div>`; }
+</script>
+</body>
+</html>
