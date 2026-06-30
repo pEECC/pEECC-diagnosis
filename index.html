@@ -1630,6 +1630,53 @@ function scoreRangeText(st){
   const max = Math.max(...st.values);
   return `${formatScore(min)}–${formatScore(max)} / 5`;
 }
+
+function scoreToPercent(v){
+  const n = Number(v);
+  if(Number.isNaN(n)) return 0;
+  return Math.max(0, Math.min(100, ((n - 1) / 4) * 100));
+}
+function distributionClass(label){
+  const t = String(label || '').toLowerCase();
+  if(t.includes('legitimacy')) return 'legitimacy';
+  if(t.includes('capability')) return 'capability';
+  if(t.includes('connectedness')) return 'connectedness';
+  return 'phase';
+}
+function scoreDistributionGraphic(st, cls='phase'){
+  if(!st || st.n===0 || st.median == null || !Array.isArray(st.values) || !st.values.length){
+    return '<div class="score-distribution score-dist-empty">No scores yet</div>';
+  }
+  const vals = st.values.filter(v => v != null && !Number.isNaN(v));
+  const min = Math.min(...vals);
+  const max = Math.max(...vals);
+  const q1 = st.q1 ?? min;
+  const q3 = st.q3 ?? max;
+  const med = st.median;
+  const left = scoreToPercent(min);
+  const right = scoreToPercent(max);
+  const qLeft = scoreToPercent(q1);
+  const qRight = scoreToPercent(q3);
+  const medLeft = scoreToPercent(med);
+  const rangeWidth = Math.max(2, right - left);
+  const iqrWidth = Math.max(2, qRight - qLeft);
+  return `<div class="score-distribution">
+    <div class="score-dist-track" aria-label="Median ${formatScore(med)}, IQR ${formatScore(q1)} to ${formatScore(q3)}, range ${formatScore(min)} to ${formatScore(max)}">
+      <div class="score-dist-range" style="left:${left}%;width:${rangeWidth}%;"></div>
+      <div class="score-dist-iqr ${esc(cls)}" style="left:${qLeft}%;width:${iqrWidth}%;"></div>
+      <div class="score-dist-median" style="left:${medLeft}%;"></div>
+    </div>
+    <div class="score-dist-scale"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div>
+    <div class="score-dist-text">Median ${formatScore(med)}; IQR ${formatScore(q1)}–${formatScore(q3)}; range ${formatScore(min)}–${formatScore(max)}${st.n?`; n=${st.n}`:''}</div>
+  </div>`;
+}
+function scoreDistributionLegend(){
+  return `<div class="score-dist-legend small">
+    <span><b>Line</b> = range</span>
+    <span><b>Box</b> = IQR</span>
+    <span><b>Marker</b> = median</span>
+  </div>`;
+}
 function renderRespondentRoleScores(items){
   if(!items || !items.length) return '<div class="small muted">No respondent scores available.</div>';
   const groups = {};
@@ -1756,6 +1803,72 @@ function renderInterventionLibraryOverview(){
     <p>${esc(c.text)}</p>
   </div>`).join('')}</div>`;
 }
+
+function conditionChip(name){
+  const cls = name === 'Legitimacy' ? 'legitimacy' : name === 'Capability' ? 'capability' : 'connectedness';
+  return `<span class="condition-chip ${cls}">${esc(name)}</span>`;
+}
+function scoreInterpretation(st){
+  if(!st || st.n === 0 || st.median == null) return 'No score yet';
+  if(st.median < 2.5) return 'Priority area to strengthen';
+  if(st.median < 3.5) return 'Partial or inconsistent';
+  return 'Relative strength';
+}
+function renderConditionsInterpretation(lcc){
+  const domainInfo = {
+    'Legitimacy': {meaning: 'Whether staff feel allowed and expected to act, and whether emergency care is prioritised.'},
+    'Capability': {meaning: 'Staff confidence, competence, and practical ability to recognise and respond to critical illness.'},
+    'Connectedness': {meaning: 'How people — clinical and non-clinical staff, patients, and caregivers — come together, share information, and work towards common goals.'}
+  };
+  const phaseMeaning = {
+    'ENTRY': 'Whether sick children are allowed to bypass routine queues, registration, payment, and waiting processes.',
+    'RECOGNITION': 'Whether critical illness is made visible early, including illness that is not immediately obvious.',
+    'RESPONSE': 'Whether urgent action can start despite workload, uncertainty, limited authority, incomplete diagnosis, or unclear responsibility.',
+    'CONTINUITY': 'Whether care continues after the first response through reassessment, handover, escalation, and referral.'
+  };
+  if(!Object.values(lcc.phaseStats).some(st => st && st.n > 0)){
+    return `<div class="action-empty"><b>No Environment scores yet.</b><br><span class="muted">Add one or more respondents to generate environment interpretation.</span></div>`;
+  }
+  const phaseRows = PHASE_ORDER.map(p => {
+    const st = lcc.phaseStats[p] || {n:0};
+    const label = p.charAt(0)+p.slice(1).toLowerCase();
+    return `<tr><td data-label="Phase of care"><b>${esc(label)}</b></td><td data-label="Score distribution">${scoreDistributionGraphic(st,'phase')}<div class="score-note">n=${st.n || 0}</div></td><td data-label="Interpretation">${esc(scoreInterpretation(st))}</td><td data-label="What this means">${esc(phaseMeaning[p])}</td></tr>`;
+  }).join('');
+  const conditionRows = DOMAIN_ORDER.map(d => {
+    const st = lcc.domainStats[d] || {n:0};
+    return `<tr><td data-label="Condition">${conditionChip(d)}</td><td data-label="Score distribution">${scoreDistributionGraphic(st,distributionClass(d))}<div class="score-note">n=${st.n || 0}</div></td><td data-label="Interpretation">${esc(scoreInterpretation(st))}</td><td data-label="What this means">${esc(domainInfo[d].meaning)}</td></tr>`;
+  }).join('');
+  const variationRows = DOMAIN_ORDER.map(d => {
+    const st = lcc.domainStats[d] || {n:0};
+    const values = Array.isArray(st.values) ? st.values : [];
+    const spread = values.length ? Math.max(...values) - Math.min(...values) : null;
+    const note = spread == null ? 'No score yet' : spread >= 2 ? 'Wide variation — discuss role, shift or location differences' : 'Limited to moderate variation';
+    return `<tr><td data-label="Condition">${conditionChip(d)}</td><td data-label="n">${st.n || 0}</td><td data-label="Score distribution">${scoreDistributionGraphic(st,distributionClass(d))}</td><td data-label="Interpretation">${esc(note)}</td></tr>`;
+  }).join('');
+  const cadreVariationItems = [];
+  DOMAIN_ORDER.forEach(d => {
+    const groups = {};
+    lcc.respondents.forEach(r => {
+      const score = r.domains ? r.domains[d] : null;
+      if(score == null || Number.isNaN(score)) return;
+      const role = (r.respondent && r.respondent.role ? r.respondent.role : '').trim() || 'Respondent group/role not specified';
+      if(!groups[role]) groups[role] = [];
+      groups[role].push(score);
+    });
+    Object.entries(groups).forEach(([role, scores]) => cadreVariationItems.push({condition:d, role, stats:stats(scores)}));
+  });
+  const cadreVariationRows = cadreVariationItems.length ? cadreVariationItems.map(x => `<tr><td data-label="Condition">${conditionChip(x.condition)}</td><td data-label="Respondent group / cadre">${esc(x.role)}</td><td data-label="n">${x.stats.n}</td><td data-label="Score distribution">${scoreDistributionGraphic(x.stats,distributionClass(x.condition))}</td></tr>`).join('') : `<tr><td colspan="4" class="muted">No respondent group/role data available yet.</td></tr>`;
+  return `<div class="priority-callout"><h4>1. Environment by phase of care</h4><p class="environment-section-intro">This view shows where the hospital environment is strongest or weakest along the child's journey.</p>${scoreDistributionLegend()}</div>
+    <table class="phase-condition-table responsive-table"><thead><tr><th>Phase of care</th><th>Score distribution</th><th>Interpretation</th><th>What this means</th></tr></thead><tbody>${phaseRows}</tbody></table>
+    <div class="priority-callout"><h4>2. Environment by condition</h4><p class="environment-section-intro">This view summarises the three environmental conditions across the whole patient journey.</p>${scoreDistributionLegend()}</div>
+    <table class="phase-condition-table responsive-table"><thead><tr><th>Condition</th><th>Score distribution</th><th>Interpretation</th><th>What this means</th></tr></thead><tbody>${conditionRows}</tbody></table>
+    <div class="priority-callout"><h4>3. Variation in scoring for Legitimacy, Capability and Connectedness</h4><p class="environment-section-intro">This section shows both the overall spread across respondents and whether different respondent groups experience the work environment differently. Wide ranges can prompt discussion about differences between roles, shifts, locations, or levels of authority.</p>${scoreDistributionLegend()}</div>
+    <h4>Overall variation across respondents</h4>
+    <table class="phase-condition-table responsive-table"><thead><tr><th>Condition</th><th>n</th><th>Score distribution</th><th>Interpretation</th></tr></thead><tbody>${variationRows}</tbody></table>
+    <h4>Variation by respondent group / cadre</h4>
+    <table class="phase-condition-table responsive-table"><thead><tr><th>Condition</th><th>Respondent group / cadre</th><th>n</th><th>Score distribution</th></tr></thead><tbody>${cadreVariationRows}</tbody></table>`;
+}
+
 function renderLccInterventionMap(lcc, wardScores=[], actionRows=[]){
   return `<div class="panel">
       <h3>1. Review resourcing for essential emergency and critical care</h3>
@@ -1930,7 +2043,7 @@ document.getElementById('downloadJson').addEventListener('click',()=>download('f
 document.getElementById('downloadCsv').addEventListener('click',()=>download('facility-diagnostic-tool-summary.csv',makeCsv(),'text/csv'));
 document.getElementById('clearAll').addEventListener('click',()=>{ if(confirm('Clear all saved data in this browser?')){ localStorage.removeItem(STORE_KEY); state=defaultState(); activeWardIndex=0; activeRespondentIndex=0; renderAll(); } });
 window.__diagnosticTool = {state, eecc, lccQuestions, calculateFacilityAvailabilityScore, calculateWardReadinessScore, calculateLccSummary, renderAll};
-try { renderAll(); document.getElementById('loadStatus').innerHTML='<div class="instruction-box success-box"><b>Loaded:</b> EECC facility rows 34/34, ward rows 35/35, LCC items 7/7. Single-file v41.</div>'; } catch(e){ console.error(e); document.getElementById('loadStatus').innerHTML=`<div class="instruction-box error-box"><b>Loading error:</b> ${esc(e.message)}</div>`; }
+try { renderAll(); document.getElementById('loadStatus').innerHTML='<div class="instruction-box success-box"><b>Loaded:</b> EECC facility rows 34/34, ward rows 35/35, LCC items 7/7. Single-file v42.</div>'; } catch(e){ console.error(e); document.getElementById('loadStatus').innerHTML=`<div class="instruction-box error-box"><b>Loading error:</b> ${esc(e.message)}</div>`; }
 </script>
 </body>
 </html>
