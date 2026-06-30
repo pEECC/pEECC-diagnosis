@@ -885,6 +885,73 @@ input, select, textarea{
   font-size:12px;
 }
 
+
+/* ---- v41 interventions page ------------------------------------------------ */
+.intervention-intro-note{
+  background:#f8fafc;
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:12px 14px;
+  margin:12px 0;
+  color:#263548;
+}
+.intervention-section-note{
+  color:var(--muted);
+  margin-top:-4px;
+}
+.priority-ward-list{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:12px;
+  margin:14px 0;
+}
+.priority-ward-card{
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:linear-gradient(180deg,#fff,#f8fbff);
+  padding:14px;
+  box-shadow:var(--shadow-sm);
+}
+.priority-ward-card h4{margin:0 0 8px;color:#193653;}
+.priority-ward-score{font-size:22px;font-weight:850;letter-spacing:-.02em;color:#173b5c;}
+.priority-ward-meta{font-size:13px;color:var(--muted);margin-top:4px;}
+.issue-pill-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;}
+.issue-pill{display:inline-block;border:1px solid #d1d5db;background:#f8fafc;border-radius:999px;padding:3px 8px;font-size:12px;font-weight:700;color:#334155;}
+.intervention-card .score-distribution{min-width:220px;}
+.intervention-component-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:12px;
+}
+.intervention-component-card{
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:#fff;
+  padding:14px;
+  box-shadow:var(--shadow-sm);
+}
+.intervention-component-card h4{margin:0 0 8px;color:#193653;}
+.component-chip-row{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0;}
+.component-chip{display:inline-block;border-radius:999px;padding:3px 8px;font-size:12px;font-weight:800;border:1px solid #d1d5db;background:#f8fafc;color:#334155;}
+.component-chip.legitimacy{background:var(--blue);border-color:var(--blue-strong);}
+.component-chip.capability{background:var(--green);border-color:var(--green-strong);}
+.component-chip.connectedness{background:var(--purple);border-color:var(--purple-strong);}
+.intervention-card ul,.intervention-component-card ul{padding-left:20px;margin-top:8px;}
+.intervention-card li,.intervention-component-card li{margin:4px 0;}
+.evidence-note{
+  background:#f8fafc;
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:10px 12px;
+  color:var(--muted);
+  font-size:13px;
+  margin-top:14px;
+}
+@media (max-width:700px){
+  .priority-ward-list,.intervention-component-grid{grid-template-columns:1fr;}
+  .intervention-card .score-distribution{min-width:0;}
+}
+
 </style>
 </head>
 <body>
@@ -1003,18 +1070,7 @@ input, select, textarea{
 
 <section id="interventionsPage" class="page" hidden>
   <h2>7. Interventions</h2>
-
-  <div class="panel">
-    <h3>What does this mean for action?</h3>
-    <p>There are priority interventions for your facility. These suggestions are generated from the phase-of-care scores and are intended to support local discussion, not prescribe a fixed intervention package.</p>
-    <div id="lccInterventionMap"></div>
-  </div>
-
-  <div class="panel">
-    <h3>Sequencing principle</h3>
-    <p><b>Start with the earliest weak phase and the simplest feasible intervention.</b> Resource gaps identify what is missing. Conditions scores help explain whether staff, routines, roles, and relationships allow, prepare, and coordinate people to care for the sick child.</p>
-    <p class="muted">If respondents disagree widely, use that disagreement as a facilitated discussion trigger before choosing interventions.</p>
-  </div>
+  <div id="lccInterventionMap"></div>
 
   <div class="panel export-panel">
     <h3>Export / reset</h3>
@@ -1476,50 +1532,92 @@ function renderEeccActionList(rows){
 }
 
 
-const PHASE_INTERVENTIONS = {
+
+const REVIEW_PHASE_INTERVENTIONS = {
   'ENTRY': {
+    title: 'Prioritise sick children at entry',
     meaning: 'Sick children may not be reliably prioritised above routine flow, registration, payment, queues, or waiting processes.',
-    interventions: [
-      'Agree a simple “sick child first” rule across clinical and non-clinical staff.',
-      'Orient reception, records, security, cleaners, and porters to obvious danger signs and where to send the child.',
-      'Use simple visual prompts at entry points: not breathing well, unconscious, convulsing, very weak, blue/pale = go straight to clinical staff.',
-      'Agree that payment or registration should not delay first clinical assessment.'
+    components: ['Triage systems', 'Dedicated triage role', 'Dedicated space / signage', 'Treatment-before-payment process', 'Clinical guidelines and protocols'],
+    actions: [
+      'Agree and visibly endorse a simple sick-child-first pathway at all first-contact points.',
+      'Clarify who can identify a sick child and move them ahead of registration, payment or queues.',
+      'Use signage, a designated triage point, or a clearly marked emergency space so acuity-based prioritisation becomes normal practice.',
+      'Include non-clinical staff such as reception, records, security, cleaners or porters in the pathway where they shape entry.'
     ]
   },
   'RECOGNITION': {
+    title: 'Make critical illness visible early',
     meaning: 'Less visible critical illness may not be reliably detected until the child looks obviously very unwell.',
-    interventions: [
-      'Use a short danger-sign checklist at first contact.',
-      'Make pulse oximetry part of first assessment where available.',
-      'Place respiratory rate, oxygen saturation, conscious level, and danger-sign prompts where children first arrive.',
-      'Use short repeated bedside teaching based on recent local cases rather than one-off classroom training.'
+    components: ['Triage systems', 'Colour-coded triage tools', 'Standardised records', 'Clinical guidelines and protocols', 'Training', 'Equipment provision'],
+    actions: [
+      'Introduce or strengthen a short first-assessment process using danger signs, respiratory rate, conscious level, oxygen saturation and glucose where feasible.',
+      'Use simple colour-coded or category-based triage tools to create a shared language of urgency.',
+      'Embed prompts into admission or assessment records so important observations are not missed.',
+      'Pair training with working equipment, job aides and repeated practice so recognition can occur across shifts and locations.'
     ]
   },
   'RESPONSE': {
-    meaning: 'Children may be recognised as sick, but urgent treatment may be delayed by workload, uncertainty, limited authority, or waiting for diagnosis or senior review.',
-    interventions: [
-      'Agree which emergency actions can start before diagnosis or senior review: oxygen, glucose, anticonvulsant, antibiotics, and fluids according to local protocol.',
-      'Keep essential emergency items together where sick children are first managed.',
-      'Define a simple call-for-help trigger: who to call, when to call, and how to call.',
-      'Senior staff explicitly back early emergency action while escalation is happening.'
+    title: 'Enable urgent action once a child is recognised as sick',
+    meaning: 'Children may be recognised as sick, but urgent treatment may be delayed by workload, uncertainty, limited authority, incomplete diagnosis, or unclear responsibility.',
+    components: ['Clinical guidelines and protocols', 'Task-shifting', 'Simulation', 'Onsite / work-based training', 'Supervision and mentorship', 'Emergency trolley / treatment bundle'],
+    actions: [
+      'Agree which emergency actions can start while diagnosis, investigations or senior review are still underway.',
+      'Formally authorise appropriate cadres to start agreed first actions, such as oxygen, glucose, anticonvulsant, antibiotics or fluids according to local protocols.',
+      'Keep essential emergency items together at the point where sick children are first managed.',
+      'Use short simulation or case-based practice to clarify roles, communication and first-10-minute actions.'
     ]
   },
   'CONTINUITY': {
+    title: 'Sustain emergency care after the first response',
     meaning: 'Emergency care may stop after first treatment; deterioration, escalation, and handover may be unreliable.',
-    interventions: [
-      'Create a simple high-risk or watch list for children needing reassessment.',
-      'Agree reassessment triggers for children on oxygen, fluids, anticonvulsants, antibiotics, or awaiting referral.',
-      'Add one handover question: “What are we worried about, and what should trigger escalation?”',
-      'Tell caregivers which signs should prompt them to call staff: worse breathing, reduced alertness, colour change, poor feeding, convulsions, or worsening weakness.'
+    components: ['Track-and-trigger charts', 'Standardised records', 'Escalation pathway', 'Handover prompts', 'Audit / mortality and morbidity meetings', 'Supervision and mentorship'],
+    actions: [
+      'Create a simple high-risk or watch-list process for children needing reassessment.',
+      'Use monitoring or track-and-trigger charts with clear escalation thresholds and a named senior-help pathway.',
+      'Add handover prompts: what are we worried about, what treatment is pending, and what should trigger escalation or referral?',
+      'Use case review, audit or mortality and morbidity meetings to identify where continuity fails and agree practical fixes.'
+    ]
+  }
+};
+
+const REVIEW_DOMAIN_INTERVENTIONS = {
+  'Legitimacy': {
+    meaning: 'The facility may need to make emergency care visibly expected, authorised and valued.',
+    components: ['Dedicated space / signage', 'Dedicated triage role', 'Triage systems', 'Task-shifting with formal authorisation', 'Leader-endorsed guidelines', 'Champions', 'Visible leadership'],
+    actions: [
+      'Clarify who is responsible for paediatric emergency care at each first-contact point and after hours.',
+      'Make the emergency role visible through an identified triage role, emergency space, signage, or named escalation responsibility.',
+      'Ensure senior leaders explicitly back agreed emergency actions and protect staff who act appropriately before senior review.',
+      'Use champions to model the desired emergency-care behaviours and reinforce that this work is valued.'
+    ]
+  },
+  'Capability': {
+    meaning: 'The facility may need to strengthen staff knowledge, skills, confidence and practical ability to act.',
+    components: ['Training', 'Simulation', 'Clinical guidelines and protocols', 'Standardised records', 'Equipment provision', 'Work-based training', 'Supervision and mentorship'],
+    actions: [
+      'Target training to the weak phase of care rather than using broad one-off courses alone.',
+      'Pair training with the resources and job aides needed to use the skill in real clinical work.',
+      'Use work-based mentoring, short refreshers and simulation to improve transfer of learning into practice.',
+      'Plan for staff rotation and turnover by building repeated orientation and peer teaching into routine work.'
+    ]
+  },
+  'Connectedness': {
+    meaning: 'The facility may need to strengthen shared purpose, communication, coordination and collective responsibility.',
+    components: ['Multidisciplinary training', 'Shared problem-solving', 'Audit and feedback', 'Standardised records', 'Track-and-trigger charts', 'Champions', 'Supportive supervision'],
+    actions: [
+      'Create regular opportunities for staff from different cadres, shifts and locations to discuss sick-child care together.',
+      'Use shared records, triage categories, escalation triggers and handover prompts to create a common mental model.',
+      'Use audit, case review or M&M meetings as learning conversations rather than blame-focused reviews.',
+      'Build bridges between wards, OPD/emergency areas, maternity/neonatal areas, pharmacy, laboratory, records and transport where these relationships shape care.'
     ]
   }
 };
 
 function phasePriorityLabel(score){
   if(score == null || Number.isNaN(score)) return {label:'No score yet', cls:'priority-low'};
-  if(score < 2.5) return {label:'Priority phase for intervention', cls:'priority-high'};
-  if(score < 3.5) return {label:'Partial / inconsistent — discuss and strengthen', cls:'priority-mid'};
-  return {label:'Relative strength — maintain and learn from this area', cls:'priority-low'};
+  if(score < 2.5) return {label:'High priority', cls:'priority-high'};
+  if(score < 3.5) return {label:'Partial / inconsistent', cls:'priority-mid'};
+  return {label:'Relative strength', cls:'priority-low'};
 }
 
 function scoreMedianText(st){
@@ -1533,204 +1631,159 @@ function scoreRangeText(st){
   return `${formatScore(min)}–${formatScore(max)} / 5`;
 }
 function renderRespondentRoleScores(items){
-  if(!items.length) return `<p class="small">No respondent group/role data available.</p>`;
+  if(!items || !items.length) return '<div class="small muted">No respondent scores available.</div>';
   const groups = {};
   items.forEach(x => {
-    const role = (x.role || '').trim() || 'Respondent group/role not specified';
-    if(!groups[role]) groups[role]=[];
+    const role = (x.role || '').trim() || 'Role not specified';
+    if(!groups[role]) groups[role] = [];
     if(x.score != null && !Number.isNaN(x.score)) groups[role].push(x.score);
   });
-  const rows = Object.entries(groups).map(([role, scores]) => {
-    const s = stats(scores);
-    return `<tr><td data-label="Respondent group/role">${esc(role)}</td><td data-label="n">${scores.length}</td><td data-label="Median">${scoreMedianText(s)}</td><td data-label="Range">${scoreRangeText(s)}</td></tr>`;
-  }).join('');
-  return `<table class="role-score-table responsive-table"><thead><tr><th>Respondent group/role</th><th>n</th><th>Median</th><th>Range</th></tr></thead><tbody>${rows}</tbody></table>`;
+  return `<table class="role-score-table responsive-table"><thead><tr><th>Respondent group</th><th>n</th><th>Median</th><th>Range</th></tr></thead><tbody>${Object.entries(groups).map(([role, vals])=>{
+    const st=stats(vals);
+    return `<tr><td data-label="Respondent group">${esc(role)}</td><td data-label="n">${st.n}</td><td data-label="Median">${scoreMedianText(st)}</td><td data-label="Range">${scoreRangeText(st)}</td></tr>`;
+  }).join('')}</tbody></table>`;
 }
-
-function conditionChip(name){
-  const cls = name === 'Legitimacy' ? 'legitimacy' : name === 'Capability' ? 'capability' : 'connectedness';
-  return `<span class="condition-chip ${cls}">${esc(name)}</span>`;
+function wardDisplayName(ward, i){
+  return ward.name || ward.profile.ward_unit_name || `Ward/unit ${i+1}`;
 }
-function scoreInterpretation(st){
-  if(!st || st.n === 0 || st.median == null) return 'No score yet';
-  if(st.median < 2.5) return 'Priority area to strengthen';
-  if(st.median < 3.5) return 'Partial or inconsistent';
-  return 'Relative strength';
-}
-function phaseConditionNames(phase){
-  const map = {
-    'ENTRY': ['Legitimacy'],
-    'RECOGNITION': ['Capability'],
-    'RESPONSE': ['Legitimacy','Capability','Connectedness'],
-    'CONTINUITY': ['Legitimacy','Connectedness']
-  };
-  return map[phase] || [];
-}
-function distributionClass(name){
-  if(name === 'Legitimacy') return 'legitimacy';
-  if(name === 'Capability') return 'capability';
-  if(name === 'Connectedness') return 'connectedness';
-  return 'phase';
-}
-function scoreDistributionGraphic(st, cls='phase'){
-  if(!st || !st.n || st.median == null) return '<div class="score-dist-empty">No score yet</div>';
-  const values = Array.isArray(st.values) ? st.values : [];
-  const min = values.length ? Math.min(...values) : st.median;
-  const max = values.length ? Math.max(...values) : st.median;
-  const q1 = st.q1 == null ? st.median : st.q1;
-  const q3 = st.q3 == null ? st.median : st.q3;
-  const pos = v => Math.max(0, Math.min(100, ((v - 1) / 4) * 100));
-  const minP = pos(min), maxP = pos(max), q1P = pos(q1), q3P = pos(q3), medP = pos(st.median);
-  const rangeWidth = Math.max(2, maxP - minP);
-  const iqrWidth = Math.max(2, q3P - q1P);
-  const title = `median ${formatScore(st.median)}; IQR ${formatScore(q1)}–${formatScore(q3)}; range ${formatScore(min)}–${formatScore(max)}; n=${st.n}`;
-  return `<div class="score-distribution" title="${esc(title)}">
-    <div class="score-dist-track">
-      <div class="score-dist-range" style="left:${minP}%;width:${rangeWidth}%"></div>
-      <div class="score-dist-iqr ${esc(cls)}" style="left:${q1P}%;width:${iqrWidth}%"></div>
-      <div class="score-dist-median" style="left:${medP}%"></div>
-    </div>
-    <div class="score-dist-scale"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div>
-    <div class="score-dist-text">Median ${formatScore(st.median)} · IQR ${formatScore(q1)}–${formatScore(q3)} · Range ${formatScore(min)}–${formatScore(max)}</div>
-  </div>`;
-}
-function scoreDistributionLegend(){
-  return `<div class="score-legend"><span><i class="range-key"></i>Range</span><span><i class="iqr-key"></i>IQR</span><span><i class="median-key"></i>Median</span></div>`;
-}
-function renderConditionsInterpretation(lcc){
-  const domainInfo = {
-    'Legitimacy': {
-      meaning: 'Whether staff feel allowed and expected to act, and whether emergency care is prioritised.'
-    },
-    'Capability': {
-      meaning: 'Staff confidence, competence, and practical ability to recognise and respond to critical illness.'
-    },
-    'Connectedness': {
-      meaning: 'How people — clinical and non-clinical staff, patients, and caregivers — come together, share information, and work towards common goals.'
-    }
-  };
-
-  const phaseMeaning = {
-    'ENTRY': 'Whether sick children are allowed to bypass routine queues, registration, payment, and waiting processes.',
-    'RECOGNITION': 'Whether critical illness is made visible early, including illness that is not immediately obvious.',
-    'RESPONSE': 'Whether urgent action can start despite workload, uncertainty, limited authority, incomplete diagnosis, or unclear responsibility.',
-    'CONTINUITY': 'Whether care continues after the first response through reassessment, handover, escalation, and referral.'
-  };
-
-  if(!Object.values(lcc.phaseStats).some(st => st && st.n > 0)){
-    return `<div class="action-empty"><b>No Environment scores yet.</b><br><span class="muted">Add one or more respondents to generate environment interpretation.</span></div>`;
-  }
-
-  const phaseRows = PHASE_ORDER.map(p => {
-    const st = lcc.phaseStats[p] || {n:0};
-    const label = p.charAt(0)+p.slice(1).toLowerCase();
-    return `<tr>
-      <td data-label="Phase of care"><b>${esc(label)}</b></td>
-      <td data-label="Score distribution">${scoreDistributionGraphic(st,'phase')}<div class="score-note">n=${st.n || 0}</div></td>
-      <td data-label="Interpretation">${esc(scoreInterpretation(st))}</td>
-      <td data-label="What this means">${esc(phaseMeaning[p])}</td>
-    </tr>`;
-  }).join('');
-
-  const conditionRows = DOMAIN_ORDER.map(d => {
-    const st = lcc.domainStats[d] || {n:0};
-    return `<tr>
-      <td data-label="Condition">${conditionChip(d)}</td>
-      <td data-label="Score distribution">${scoreDistributionGraphic(st,distributionClass(d))}<div class="score-note">n=${st.n || 0}</div></td>
-      <td data-label="Interpretation">${esc(scoreInterpretation(st))}</td>
-      <td data-label="What this means">${esc(domainInfo[d].meaning)}</td>
-    </tr>`;
-  }).join('');
-
-  const variationRows = DOMAIN_ORDER.map(d => {
-    const st = lcc.domainStats[d] || {n:0};
-    const values = Array.isArray(st.values) ? st.values : [];
-    const spread = values.length ? Math.max(...values) - Math.min(...values) : null;
-    const note = spread == null ? 'No score yet' : spread >= 2 ? 'Wide variation — discuss role, shift or location differences' : 'Limited to moderate variation';
-    return `<tr>
-      <td data-label="Condition">${conditionChip(d)}</td>
-      <td data-label="n">${st.n || 0}</td>
-      <td data-label="Score distribution">${scoreDistributionGraphic(st,distributionClass(d))}</td>
-      <td data-label="Interpretation">${esc(note)}</td>
-    </tr>`;
-  }).join('');
-
-  const cadreVariationItems = [];
-  DOMAIN_ORDER.forEach(d => {
-    const groups = {};
-    lcc.respondents.forEach(r => {
-      const score = r.domains ? r.domains[d] : null;
-      if(score == null || Number.isNaN(score)) return;
-      const role = (r.respondent && r.respondent.role ? r.respondent.role : '').trim() || 'Respondent group/role not specified';
-      if(!groups[role]) groups[role] = [];
-      groups[role].push(score);
-    });
-    Object.entries(groups).forEach(([role, scores]) => {
-      cadreVariationItems.push({condition:d, role, stats:stats(scores)});
-    });
+function wardIssueSummaryFromRows(rows, wardName){
+  const wr = rows.filter(r => r.where === wardName);
+  const counts = {};
+  wr.forEach(r => {
+    const label = r.section === 'Guidelines, routines, workforce and access processes' ? 'Guidelines/routines/workforce' : resourceCategoryLabel(r.category);
+    counts[label] = (counts[label] || 0) + 1;
   });
-  const cadreVariationRows = cadreVariationItems.length ? cadreVariationItems.map(x => `<tr>
-      <td data-label="Condition">${conditionChip(x.condition)}</td>
-      <td data-label="Respondent group / cadre">${esc(x.role)}</td>
-      <td data-label="n">${x.stats.n}</td>
-      <td data-label="Score distribution">${scoreDistributionGraphic(x.stats,distributionClass(x.condition))}</td>
-    </tr>`).join('') : `<tr><td colspan="4" class="muted">No respondent group/role data available yet.</td></tr>`;
-
-  return `<div class="priority-callout">
-      <h4>1. Environment by phase of care</h4>
-      <p class="environment-section-intro">This view shows where the hospital environment is strongest or weakest along the child's journey.</p>
-      ${scoreDistributionLegend()}
-    </div>
-    <table class="phase-condition-table responsive-table"><thead><tr><th>Phase of care</th><th>Score distribution</th><th>Interpretation</th><th>What this means</th></tr></thead><tbody>${phaseRows}</tbody></table>
-
-    <div class="priority-callout">
-      <h4>2. Environment by condition</h4>
-      <p class="environment-section-intro">This view summarises the three contextual conditions across the whole patient journey.</p>
-      ${scoreDistributionLegend()}
-    </div>
-    <table class="phase-condition-table responsive-table"><thead><tr><th>Condition</th><th>Score distribution</th><th>Interpretation</th><th>What this means</th></tr></thead><tbody>${conditionRows}</tbody></table>
-
-    <div class="priority-callout">
-      <h4>3. Variation in scoring for Legitimacy, Capability and Connectedness</h4>
-      <p class="environment-section-intro">This section shows both the overall spread across respondents and whether different respondent groups experience the work environment differently. Wide ranges can prompt discussion about differences between roles, shifts, locations, or levels of authority.</p>
-      ${scoreDistributionLegend()}
-    </div>
-    <h4>Overall variation across respondents</h4>
-    <table class="phase-condition-table responsive-table"><thead><tr><th>Condition</th><th>n</th><th>Score distribution</th><th>Interpretation</th></tr></thead><tbody>${variationRows}</tbody></table>
-    <h4>Variation by respondent group / cadre</h4>
-    <table class="phase-condition-table responsive-table"><thead><tr><th>Condition</th><th>Respondent group / cadre</th><th>n</th><th>Score distribution</th></tr></thead><tbody>${cadreVariationRows}</tbody></table>`;
+  const pills = Object.entries(counts).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<span class="issue-pill">${esc(k)}: ${v}</span>`).join('');
+  return {count: wr.length, pills};
 }
-
-function renderLccInterventionMap(lcc){
-  const rows = PHASE_ORDER.map(p => {
-    const st = lcc.phaseStats[p] || {};
-    return {phase:p, score:st.median, q1:st.q1, q3:st.q3, iqr:st.iqr, n:st.n || 0};
-  });
-
-  if(!rows.some(r => r.n > 0)){
-    return `<div class="action-empty"><b>No Conditions scores yet.</b><br><span class="muted">Add one or more respondents to generate phase-based intervention suggestions.</span></div>`;
+function renderResourceReviewInterventions(wardScores, actionRows){
+  if(!wardScores || !wardScores.length){
+    return `<div class="action-empty"><b>No ward/unit readiness assessments yet.</b><br><span class="muted">Complete the Resources page first, then review detailed gaps under Interpretation - resources.</span></div>`;
   }
-
-  return rows.map(r => {
-    const p = phasePriorityLabel(r.score);
-    const info = PHASE_INTERVENTIONS[r.phase];
-    const disagreement = r.iqr != null && r.iqr >= 1.5
-      ? `<p class="small"><b>Discussion trigger:</b> respondents differed substantially on this phase (wide IQR).</p>`
-      : '';
+  const candidates = wardScores.map((x,i)=>{
+    const name = wardDisplayName(x.ward,i);
+    const issues = wardIssueSummaryFromRows(actionRows, name);
+    return {name, score:x.score, issues};
+  }).sort((a,b)=>{
+    if(a.score.percent !== b.score.percent) return a.score.percent - b.score.percent;
+    return b.issues.count - a.issues.count;
+  });
+  const priority = candidates.filter(x => x.issues.count > 0 || x.score.percent < 80).slice(0,5);
+  if(!priority.length){
+    return `<div class="action-empty"><b>No priority ward/unit resource review generated.</b><br><span class="muted">All assessed wards currently meet scored ward/bedside readiness criteria.</span></div>`;
+  }
+  return `<p class="intervention-section-note">Review these wards/units first, then use the detailed list under <b>Interpretation - resources</b> to decide which gaps are feasible to address.</p>
+    <div class="priority-ward-list">${priority.map(x=>`<div class="priority-ward-card">
+      <h4>${esc(x.name)}</h4>
+      <div class="priority-ward-score">${x.score.points}/${x.score.denominator} (${x.score.percent}%)</div>
+      <div class="priority-ward-meta">${x.issues.count} specific gap${x.issues.count===1?'':'s'} listed under Interpretation - resources</div>
+      <div class="issue-pill-list">${x.issues.pills || '<span class="issue-pill">Low readiness score</span>'}</div>
+    </div>`).join('')}</div>`;
+}
+function scoredPriorityItems(statsByKey, order){
+  const scored = order.map(key => ({key, st:statsByKey[key]})).filter(x => x.st && x.st.n > 0 && x.st.median != null);
+  if(!scored.length) return [];
+  const min = Math.min(...scored.map(x => x.st.median));
+  return scored.filter(x => x.st.median === min);
+}
+function renderComponentChips(components){
+  return `<div class="component-chip-row">${components.map(c=>`<span class="component-chip">${esc(c)}</span>`).join('')}</div>`;
+}
+function renderPhaseInterventionCards(lcc){
+  const priorities = scoredPriorityItems(lcc.phaseStats, PHASE_ORDER);
+  if(!priorities.length){
+    return `<div class="action-empty"><b>No Environment scores yet.</b><br><span class="muted">Add one or more Environment respondents to generate phase-based intervention suggestions.</span></div>`;
+  }
+  return priorities.map(x => {
+    const info = REVIEW_PHASE_INTERVENTIONS[x.key];
+    const p = phasePriorityLabel(x.st.median);
+    const label = x.key.charAt(0)+x.key.slice(1).toLowerCase();
     return `<div class="intervention-card ${p.cls}">
       <div class="intervention-head">
         <div>
-          <span class="phase-badge">${esc(r.phase.charAt(0)+r.phase.slice(1).toLowerCase())}</span>
-          <h4>${esc(p.label)}</h4>
+          <span class="phase-badge">${esc(label)}</span>
+          <h4>${esc(info.title)}</h4>
         </div>
-        <div class="intervention-score">${r.score==null?'—':formatScore(r.score)} / 5 ${r.n?`<br><span class="small">IQR ${formatScore(r.q1)}–${formatScore(r.q3)}, n=${r.n}</span>`:''}</div>
+        <div class="intervention-score">${scoreDistributionGraphic(x.st,'phase')}</div>
       </div>
-      <p><b>What this may mean:</b> ${esc(info.meaning)}</p>
-      ${disagreement}
-      <p><b>Priority interventions to discuss:</b></p>
-      <ul>${info.interventions.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>
+      <p><b>What this may mean here:</b> ${esc(info.meaning)}</p>
+      <p><b>Intervention components to discuss:</b></p>
+      ${renderComponentChips(info.components)}
+      <p><b>Possible local adaptations:</b></p>
+      <ul>${info.actions.map(a=>`<li>${esc(a)}</li>`).join('')}</ul>
     </div>`;
   }).join('');
+}
+function renderDomainInterventionCards(lcc){
+  const priorities = scoredPriorityItems(lcc.domainStats, DOMAIN_ORDER);
+  if(!priorities.length){
+    return `<div class="action-empty"><b>No Environment condition scores yet.</b><br><span class="muted">Add one or more respondents to generate Legitimacy, Capability and Connectedness suggestions.</span></div>`;
+  }
+  return priorities.map(x => {
+    const info = REVIEW_DOMAIN_INTERVENTIONS[x.key];
+    const p = phasePriorityLabel(x.st.median);
+    return `<div class="intervention-card ${p.cls}">
+      <div class="intervention-head">
+        <div>
+          <span class="phase-badge">${esc(x.key)}</span>
+          <h4>Strengthen ${esc(x.key)}</h4>
+        </div>
+        <div class="intervention-score">${scoreDistributionGraphic(x.st,distributionClass(x.key))}</div>
+      </div>
+      <p><b>What this may mean here:</b> ${esc(info.meaning)}</p>
+      <p><b>Intervention components to discuss:</b></p>
+      ${renderComponentChips(info.components)}
+      <p><b>Possible local adaptations:</b></p>
+      <ul>${info.actions.map(a=>`<li>${esc(a)}</li>`).join('')}</ul>
+    </div>`;
+  }).join('');
+}
+function renderInterventionLibraryOverview(){
+  const components = [
+    {title:'Dedicated space / signage', domains:['Legitimacy','Capability','Connectedness'], text:'Signals that emergency care is a formal priority, supports timely decision-making, and can clarify team roles when linked to processes.'},
+    {title:'Triage systems and triage roles', domains:['Legitimacy','Capability','Connectedness'], text:'Formalises urgency, structures clinical reasoning, and creates a shared language of prioritisation across cadres.'},
+    {title:'Clinical guidelines and protocols', domains:['Legitimacy','Capability','Connectedness'], text:'Clarifies accepted scope of practice, provides decision support, and creates shared expectations for emergency work.'},
+    {title:'Standardised records / track-and-trigger charts', domains:['Legitimacy','Capability','Connectedness'], text:'Prompts systematic assessment, improves information sharing, and supports escalation when deterioration is detected.'},
+    {title:'Training, simulation and work-based practice', domains:['Capability','Connectedness'], text:'Builds knowledge, skills and confidence, especially when repeated, practical, team-based and connected to feedback.'},
+    {title:'Task-shifting with supervision', domains:['Legitimacy','Capability','Connectedness'], text:'Can redefine accepted roles and improve timely action when formally authorised, trained, resourced and embedded in team workflows.'},
+    {title:'Supervision, mentorship and champions', domains:['Legitimacy','Capability','Connectedness'], text:'Reinforces expected behaviours, corrects errors, builds confidence and can bridge teams, cadres and units.'},
+    {title:'Audit, feedback and shared problem-solving', domains:['Legitimacy','Connectedness'], text:'Makes performance visible, creates learning routines, and supports collective ownership when psychologically safe.'}
+  ];
+  const chip = d => `<span class="component-chip ${esc(d.toLowerCase())}">${esc(d)}</span>`;
+  return `<div class="intervention-component-grid">${components.map(c=>`<div class="intervention-component-card">
+    <h4>${esc(c.title)}</h4>
+    <div class="component-chip-row">${c.domains.map(chip).join('')}</div>
+    <p>${esc(c.text)}</p>
+  </div>`).join('')}</div>`;
+}
+function renderLccInterventionMap(lcc, wardScores=[], actionRows=[]){
+  return `<div class="panel">
+      <h3>1. Review resourcing for essential emergency and critical care</h3>
+      <p>Before selecting workflow, behavioural, training or team-based interventions, review whether priority wards/units have the essential resources required for emergency and critical care. This section identifies the wards/units to review first; the detailed item-by-item gaps remain under <b>Interpretation - resources</b>.</p>
+      ${renderResourceReviewInterventions(wardScores, actionRows)}
+    </div>
+
+    <div class="panel">
+      <h3>2. Specific interventions: what the results may mean for this facility</h3>
+      <div class="intervention-intro-note">These suggestions are generated from the weakest phase of care and weakest Environment condition. They are intended to support local discussion and adaptation, not prescribe a fixed package.</div>
+      <h4>Priority based on phase of care</h4>
+      ${renderPhaseInterventionCards(lcc)}
+      <h4>Priority based on Environment condition</h4>
+      ${renderDomainInterventionCards(lcc)}
+    </div>
+
+    <div class="panel">
+      <h3>3. Intervention components from the review</h3>
+      <p>Use this library to choose and adapt a small number of feasible interventions. The same component can strengthen different aspects of the work environment depending on how it is implemented.</p>
+      ${renderInterventionLibraryOverview()}
+      <div class="evidence-note">Intervention components are drawn from the realist synthesis and mapped to Legitimacy, Capability and Connectedness. The review emphasises that there is no single gold-standard intervention; intervention choice should be context-dependent and based on local resources, constraints and priorities.</div>
+    </div>
+
+    <div class="panel">
+      <h3>Sequencing principle</h3>
+      <p><b>Start with the earliest weak phase and the simplest feasible intervention.</b> Resource gaps identify what is missing. Environment scores help explain whether staff, routines, roles and relationships support people to care for the sick child.</p>
+      <p class="muted">If respondent scores vary widely, use that variation as a facilitated discussion trigger before choosing interventions. Avoid choosing too many interventions at once.</p>
+    </div>`;
 }
 
 function updateDashboard(){
@@ -1748,7 +1801,7 @@ function updateDashboard(){
   const actionRows = eeccActionRows(a, wardScores);
   if(document.getElementById('interpEeccActionList')) document.getElementById('interpEeccActionList').innerHTML = renderEeccActionList(actionRows);
   if(document.getElementById('conditionsInterpretation')) document.getElementById('conditionsInterpretation').innerHTML = renderConditionsInterpretation(lcc);
-  if(document.getElementById('lccInterventionMap')) document.getElementById('lccInterventionMap').innerHTML = renderLccInterventionMap(lcc);
+  if(document.getElementById('lccInterventionMap')) document.getElementById('lccInterventionMap').innerHTML = renderLccInterventionMap(lcc, wardScores, actionRows);
 }
 function scoreIqrText(st){
   if(!st || st.n===0 || st.median==null) return '—';
@@ -1877,7 +1930,7 @@ document.getElementById('downloadJson').addEventListener('click',()=>download('f
 document.getElementById('downloadCsv').addEventListener('click',()=>download('facility-diagnostic-tool-summary.csv',makeCsv(),'text/csv'));
 document.getElementById('clearAll').addEventListener('click',()=>{ if(confirm('Clear all saved data in this browser?')){ localStorage.removeItem(STORE_KEY); state=defaultState(); activeWardIndex=0; activeRespondentIndex=0; renderAll(); } });
 window.__diagnosticTool = {state, eecc, lccQuestions, calculateFacilityAvailabilityScore, calculateWardReadinessScore, calculateLccSummary, renderAll};
-try { renderAll(); document.getElementById('loadStatus').innerHTML='<div class="instruction-box success-box"><b>Loaded:</b> EECC facility rows 34/34, ward rows 35/35, LCC items 7/7. Single-file v40.</div>'; } catch(e){ console.error(e); document.getElementById('loadStatus').innerHTML=`<div class="instruction-box error-box"><b>Loading error:</b> ${esc(e.message)}</div>`; }
+try { renderAll(); document.getElementById('loadStatus').innerHTML='<div class="instruction-box success-box"><b>Loaded:</b> EECC facility rows 34/34, ward rows 35/35, LCC items 7/7. Single-file v41.</div>'; } catch(e){ console.error(e); document.getElementById('loadStatus').innerHTML=`<div class="instruction-box error-box"><b>Loading error:</b> ${esc(e.message)}</div>`; }
 </script>
 </body>
 </html>
