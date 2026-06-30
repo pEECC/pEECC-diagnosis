@@ -1132,6 +1132,29 @@ function renderConditionsInterpretation(lcc){
     </tr>`;
   }).join('');
 
+  const cadreVariationItems = [];
+  DOMAIN_ORDER.forEach(d => {
+    const groups = {};
+    lcc.respondents.forEach(r => {
+      const score = r.domains ? r.domains[d] : null;
+      if(score == null || Number.isNaN(score)) return;
+      const role = (r.respondent && r.respondent.role ? r.respondent.role : '').trim() || 'Respondent group/role not specified';
+      if(!groups[role]) groups[role] = [];
+      groups[role].push(score);
+    });
+    Object.entries(groups).forEach(([role, scores]) => {
+      const st = stats(scores);
+      cadreVariationItems.push({condition:d, role, n:st.n, median:scoreMedianText(st), range:scoreRangeText(st)});
+    });
+  });
+  const cadreVariationRows = cadreVariationItems.length ? cadreVariationItems.map(x => `<tr>
+      <td>${conditionChip(x.condition)}</td>
+      <td>${esc(x.role)}</td>
+      <td>${x.n}</td>
+      <td>${x.median}</td>
+      <td>${x.range}</td>
+    </tr>`).join('') : `<tr><td colspan="5" class="muted">No respondent group/role data available yet.</td></tr>`;
+
   return `<div class="priority-callout">
       <h4>1. Environment by phase of care</h4>
       <p class="environment-section-intro">This view shows where the hospital environment is strongest or weakest along the child's journey.</p>
@@ -1146,9 +1169,12 @@ function renderConditionsInterpretation(lcc){
 
     <div class="priority-callout">
       <h4>3. Variation in scoring for Legitimacy, Capability and Connectedness</h4>
-      <p class="environment-section-intro">This table shows the spread of scores across respondents using the median and full range. Wide ranges can prompt discussion about differences between roles, shifts, locations, or levels of authority.</p>
+      <p class="environment-section-intro">This section shows both the overall spread across respondents and whether different respondent groups experience the work environment differently. Wide ranges can prompt discussion about differences between roles, shifts, locations, or levels of authority.</p>
     </div>
-    <table class="phase-condition-table"><thead><tr><th>Condition</th><th>n</th><th>Median</th><th>Range</th><th>Interpretation</th></tr></thead><tbody>${variationRows}</tbody></table>`;
+    <h4>Overall variation across respondents</h4>
+    <table class="phase-condition-table"><thead><tr><th>Condition</th><th>n</th><th>Median</th><th>Range</th><th>Interpretation</th></tr></thead><tbody>${variationRows}</tbody></table>
+    <h4>Variation by respondent group / cadre</h4>
+    <table class="phase-condition-table"><thead><tr><th>Condition</th><th>Respondent group / cadre</th><th>n</th><th>Median</th><th>Range</th></tr></thead><tbody>${cadreVariationRows}</tbody></table>`;
 }
 
 function renderLccInterventionMap(lcc){
