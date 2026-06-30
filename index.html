@@ -886,7 +886,7 @@ input, select, textarea{
 }
 
 
-/* ---- v41 interventions page ------------------------------------------------ */
+/* ---- v43 interventions page ------------------------------------------------ */
 .intervention-intro-note{
   background:#f8fafc;
   border:1px solid var(--line);
@@ -1533,85 +1533,146 @@ function renderEeccActionList(rows){
 
 
 
-const REVIEW_PHASE_INTERVENTIONS = {
+const PHASE_INTERVENTION_NEEDS = {
   'ENTRY': {
     title: 'Prioritise sick children at entry',
     meaning: 'Sick children may not be reliably prioritised above routine flow, registration, payment, queues, or waiting processes.',
-    components: ['Triage systems', 'Dedicated triage role', 'Dedicated space / signage', 'Treatment-before-payment process', 'Clinical guidelines and protocols'],
     actions: [
-      'Agree and visibly endorse a simple sick-child-first pathway at all first-contact points.',
+      'Agree a sick-child-first pathway at all first-contact points.',
       'Clarify who can identify a sick child and move them ahead of registration, payment or queues.',
-      'Use signage, a designated triage point, or a clearly marked emergency space so acuity-based prioritisation becomes normal practice.',
-      'Include non-clinical staff such as reception, records, security, cleaners or porters in the pathway where they shape entry.'
+      'Make the receiving point, emergency space, and immediate next step obvious to staff and caregivers.',
+      'Include non-clinical staff such as reception, records, security, cleaners or porters where they shape entry.'
     ]
   },
   'RECOGNITION': {
     title: 'Make critical illness visible early',
     meaning: 'Less visible critical illness may not be reliably detected until the child looks obviously very unwell.',
-    components: ['Triage systems', 'Colour-coded triage tools', 'Standardised records', 'Clinical guidelines and protocols', 'Training', 'Equipment provision'],
     actions: [
-      'Introduce or strengthen a short first-assessment process using danger signs, respiratory rate, conscious level, oxygen saturation and glucose where feasible.',
-      'Use simple colour-coded or category-based triage tools to create a shared language of urgency.',
-      'Embed prompts into admission or assessment records so important observations are not missed.',
-      'Pair training with working equipment, job aides and repeated practice so recognition can occur across shifts and locations.'
+      'Make respiratory rate, oxygen saturation, conscious level, perfusion and danger signs part of routine first assessment.',
+      'Use triage categories, standardised forms or job aides to create a shared language of urgency.',
+      'Pair assessment routines with working equipment and repeated practice across shifts and locations.',
+      'Make sure abnormal findings trigger a defined next step, not only documentation.'
     ]
   },
   'RESPONSE': {
     title: 'Enable urgent action once a child is recognised as sick',
     meaning: 'Children may be recognised as sick, but urgent treatment may be delayed by workload, uncertainty, limited authority, incomplete diagnosis, or unclear responsibility.',
-    components: ['Clinical guidelines and protocols', 'Task-shifting', 'Simulation', 'Onsite / work-based training', 'Supervision and mentorship', 'Emergency trolley / treatment bundle'],
     actions: [
       'Agree which emergency actions can start while diagnosis, investigations or senior review are still underway.',
-      'Formally authorise appropriate cadres to start agreed first actions, such as oxygen, glucose, anticonvulsant, antibiotics or fluids according to local protocols.',
-      'Keep essential emergency items together at the point where sick children are first managed.',
-      'Use short simulation or case-based practice to clarify roles, communication and first-10-minute actions.'
+      'Clarify first-10-minute roles, including who starts oxygen, glucose, anticonvulsants, antibiotics or fluids according to local protocols.',
+      'Keep essential emergency items together and accessible where sick children are first managed.',
+      'Use short simulation or case-based practice to rehearse task allocation, escalation and communication.'
     ]
   },
   'CONTINUITY': {
     title: 'Sustain emergency care after the first response',
-    meaning: 'Emergency care may stop after first treatment; deterioration, escalation, and handover may be unreliable.',
-    components: ['Track-and-trigger charts', 'Standardised records', 'Escalation pathway', 'Handover prompts', 'Audit / mortality and morbidity meetings', 'Supervision and mentorship'],
+    meaning: 'Emergency care may stop after first treatment; deterioration, escalation and handover may be unreliable.',
     actions: [
       'Create a simple high-risk or watch-list process for children needing reassessment.',
       'Use monitoring or track-and-trigger charts with clear escalation thresholds and a named senior-help pathway.',
       'Add handover prompts: what are we worried about, what treatment is pending, and what should trigger escalation or referral?',
-      'Use case review, audit or mortality and morbidity meetings to identify where continuity fails and agree practical fixes.'
+      'Use case review, M&M audits or inter-disciplinary meetings to identify where continuity fails and agree practical fixes.'
     ]
   }
 };
 
-const REVIEW_DOMAIN_INTERVENTIONS = {
+const ENVIRONMENT_EMPHASIS = {
   'Legitimacy': {
-    meaning: 'The facility may need to make emergency care visibly expected, authorised and valued.',
-    components: ['Dedicated space / signage', 'Dedicated triage role', 'Triage systems', 'Task-shifting with formal authorisation', 'Leader-endorsed guidelines', 'Champions', 'Visible leadership'],
-    actions: [
-      'Clarify who is responsible for paediatric emergency care at each first-contact point and after hours.',
-      'Make the emergency role visible through an identified triage role, emergency space, signage, or named escalation responsibility.',
-      'Ensure senior leaders explicitly back agreed emergency actions and protect staff who act appropriately before senior review.',
-      'Use champions to model the desired emergency-care behaviours and reinforce that this work is valued.'
-    ]
+    plain: 'permission, expectations and authority to act',
+    emphasis: 'make the intervention visibly authorised, expected and supported by senior staff; clarify who is allowed to act and when.'
   },
   'Capability': {
-    meaning: 'The facility may need to strengthen staff knowledge, skills, confidence and practical ability to act.',
-    components: ['Training', 'Simulation', 'Clinical guidelines and protocols', 'Standardised records', 'Equipment provision', 'Work-based training', 'Supervision and mentorship'],
-    actions: [
-      'Target training to the weak phase of care rather than using broad one-off courses alone.',
-      'Pair training with the resources and job aides needed to use the skill in real clinical work.',
-      'Use work-based mentoring, short refreshers and simulation to improve transfer of learning into practice.',
-      'Plan for staff rotation and turnover by building repeated orientation and peer teaching into routine work.'
-    ]
+    plain: 'knowledge, skills, confidence and practical ability',
+    emphasis: 'pair the intervention with practical training, simple tools, equipment, repeated practice and feedback.'
   },
   'Connectedness': {
-    meaning: 'The facility may need to strengthen shared purpose, communication, coordination and collective responsibility.',
-    components: ['Multidisciplinary training', 'Shared problem-solving', 'Audit and feedback', 'Standardised records', 'Track-and-trigger charts', 'Champions', 'Supportive supervision'],
-    actions: [
-      'Create regular opportunities for staff from different cadres, shifts and locations to discuss sick-child care together.',
-      'Use shared records, triage categories, escalation triggers and handover prompts to create a common mental model.',
-      'Use audit, case review or M&M meetings as learning conversations rather than blame-focused reviews.',
-      'Build bridges between wards, OPD/emergency areas, maternity/neonatal areas, pharmacy, laboratory, records and transport where these relationships shape care.'
-    ]
+    plain: 'coordination, shared responsibility and communication',
+    emphasis: 'design the intervention across cadres, shifts and units so people share the same clinical picture and know how to work together.'
   }
 };
+
+const INTERVENTION_COMPONENTS = [
+  {
+    title:'Emergency space and patient-flow redesign',
+    phases:['ENTRY','RESPONSE'],
+    conditions:['Legitimacy','Connectedness'],
+    resourceSignals:['Space','Access','Triage'],
+    summary:'Creates a predictable route for sick children from arrival to assessment, stabilisation, observation, admission, transfer or referral.',
+    focus:['Define where sick children go first and who receives them.','Separate urgent care from routine queues where feasible.','Make movement between OPD/emergency, ward, maternity/neonatal areas and referral points explicit.']
+  },
+  {
+    title:'Triage systems and triager role',
+    phases:['ENTRY','RECOGNITION'],
+    conditions:['Legitimacy','Capability','Connectedness'],
+    resourceSignals:['Triage','Guideline'],
+    summary:'Formalises prioritisation by acuity and gives staff a shared language for urgency.',
+    focus:['Define the triager role and who covers it after hours.','Keep the tool short enough to use at first contact.','Link triage category to a clear response, not only a label.']
+  },
+  {
+    title:'Clinical guidelines and protocols',
+    phases:['RECOGNITION','RESPONSE','CONTINUITY'],
+    conditions:['Legitimacy','Capability','Connectedness'],
+    resourceSignals:['Guideline','Escalation'],
+    summary:'Clarifies expected actions for common emergency presentations and supports treatment before diagnosis is complete.',
+    focus:['Prioritise high-risk presentations such as hypoxaemia, shock, seizures, altered consciousness and neonatal danger signs.','Specify first actions that can begin while awaiting senior review.','Place protocols where care is delivered and link them to available resources.']
+  },
+  {
+    title:'Routine oxygen saturation',
+    phases:['RECOGNITION','RESPONSE','CONTINUITY'],
+    conditions:['Capability'],
+    resourceSignals:['Oxygen','Monitoring','Pulse oximeter','SpO2'],
+    summary:'Makes hypoxaemia visible and creates a trigger for oxygen, escalation and reassessment.',
+    focus:['Make SpO₂ a routine vital sign for sick children and high-risk admissions.','Ensure pulse oximeters and child/neonatal probes are available where children are assessed.','Define what staff should do when SpO₂ is low or cannot be measured.']
+  },
+  {
+    title:'Standardised admission form',
+    phases:['RECOGNITION','RESPONSE','CONTINUITY'],
+    conditions:['Capability','Connectedness'],
+    resourceSignals:['Monitoring','Record'],
+    summary:'Prompts systematic assessment, reduces omissions and improves information sharing during admission and handover.',
+    focus:['Include danger signs, complete vital signs, SpO₂, treatments started, pending tasks and escalation plan.','Keep the form usable during busy periods.','Use it to communicate risk across shifts and locations.']
+  },
+  {
+    title:'Track-and-trigger monitoring charts',
+    phases:['CONTINUITY','RESPONSE'],
+    conditions:['Legitimacy','Capability','Connectedness'],
+    resourceSignals:['Monitoring','Escalation','Vital signs'],
+    summary:'Supports ongoing reassessment and turns deterioration into a clear escalation trigger.',
+    focus:['Define minimum monitoring frequency for high-risk children.','Use clear thresholds for escalation and senior review.','Make escalation safe and expected for nurses, midwives and junior clinicians.']
+  },
+  {
+    title:'In-service training and simulation',
+    phases:['RECOGNITION','RESPONSE'],
+    conditions:['Capability','Connectedness'],
+    resourceSignals:['Training'],
+    summary:'Builds practical skill and confidence, especially when it is short, repeated, scenario-based and connected to local workflows.',
+    focus:['Target training to the weakest phase of care rather than broad teaching alone.','Use local cases and the actual equipment available on the ward.','Practise team roles, communication and escalation, not only technical skills.']
+  },
+  {
+    title:'Task-shifting with supervision',
+    phases:['ENTRY','RESPONSE','CONTINUITY'],
+    conditions:['Legitimacy','Capability','Connectedness'],
+    resourceSignals:['Staffing','Training','Escalation'],
+    summary:'Allows timely first actions when the usual authorised staff member is absent or delayed, but only when scope, support and supervision are clear.',
+    focus:['Specify which cadres can start which emergency actions.','Pair expanded roles with training, protocols and access to senior advice.','Avoid “everyone’s role, no one’s responsibility” by defining accountability and handover.']
+  },
+  {
+    title:'Morbidity and mortality audits',
+    phases:['CONTINUITY'],
+    conditions:['Legitimacy','Connectedness'],
+    resourceSignals:['Variation','Escalation'],
+    summary:'Creates a structured learning routine to identify avoidable delays, missed escalation and system failures.',
+    focus:['Keep the discussion blame-aware and focused on systems, not individual fault.','Track a small number of agreed actions after each audit.','Include near-misses and deterioration events, not only deaths.']
+  },
+  {
+    title:'Inter-disciplinary clinical meetings',
+    phases:['RESPONSE','CONTINUITY'],
+    conditions:['Connectedness'],
+    resourceSignals:['Variation','Handover'],
+    summary:'Builds shared understanding across cadres and units about how sick-child care should work.',
+    focus:['Include the people who shape the child’s journey: OPD/emergency, ward, maternity/neonatal staff, pharmacy, laboratory, records and transport where relevant.','Use meetings to agree practical changes to roles, handover, escalation and resource workarounds.','Return to the diagnostic scores to check whether relationships and routines are improving.']
+  }
+];
 
 function phasePriorityLabel(score){
   if(score == null || Number.isNaN(score)) return {label:'No score yet', cls:'priority-low'};
@@ -1733,18 +1794,124 @@ function scoredPriorityItems(statsByKey, order){
   const min = Math.min(...scored.map(x => x.st.median));
   return scored.filter(x => x.st.median === min);
 }
+function interventionResourceSignals(actionRows){
+  const signals = new Set();
+  (actionRows || []).forEach(r => {
+    const text = `${r.where || ''} ${r.category || ''} ${r.item || ''} ${r.gapType || ''} ${r.section || ''}`.toLowerCase();
+    if(text.includes('oxygen')) signals.add('Oxygen');
+    if(text.includes('pulse oximeter') || text.includes('spo') || text.includes('vital sign')) { signals.add('Pulse oximeter'); signals.add('Monitoring'); signals.add('SpO2'); }
+    if(text.includes('triage')) signals.add('Triage');
+    if(text.includes('guideline') || text.includes('protocol')) signals.add('Guideline');
+    if(text.includes('senior') || text.includes('escalation') || text.includes('help')) signals.add('Escalation');
+    if(text.includes('training') || text.includes('trained')) signals.add('Training');
+    if(text.includes('nurse') || text.includes('staff')) signals.add('Staffing');
+    if(text.includes('admission') || text.includes('record')) signals.add('Record');
+    if(text.includes('space') || text.includes('area') || text.includes('hdu') || text.includes('icu')) signals.add('Space');
+    if(text.includes('payment') || text.includes('access') || text.includes('queue') || text.includes('arrival')) signals.add('Access');
+  });
+  return signals;
+}
+function weakestKeys(statsByKey, order){
+  const scored = order.map(key => ({key, st:statsByKey[key]})).filter(x => x.st && x.st.n > 0 && x.st.median != null);
+  if(!scored.length) return [];
+  const min = Math.min(...scored.map(x => x.st.median));
+  return scored.filter(x => x.st.median === min).map(x => x.key);
+}
+function phaseLabel(key){ return key ? key.charAt(0)+key.slice(1).toLowerCase() : ''; }
+function scorePriorityText(st){
+  if(!st || st.n === 0 || st.median == null) return 'No score yet';
+  return `${formatScore(st.median)} / 5, ${scoreInterpretation(st).toLowerCase()}`;
+}
+function scoreComponentRelevance(component, lcc, actionRows){
+  let score = 0;
+  const reasons = [];
+  const priorityPhases = weakestKeys(lcc.phaseStats || {}, PHASE_ORDER);
+  const priorityConditions = weakestKeys(lcc.domainStats || {}, DOMAIN_ORDER);
+  const resourceSignals = interventionResourceSignals(actionRows);
+  const wideVariation = DOMAIN_ORDER.some(d => {
+    const st = lcc.domainStats ? lcc.domainStats[d] : null;
+    const vals = st && Array.isArray(st.values) ? st.values : [];
+    return vals.length && (Math.max(...vals) - Math.min(...vals) >= 2);
+  });
+
+  const phaseHits = component.phases.filter(p => priorityPhases.includes(p));
+  if(phaseHits.length){
+    score += 4 * phaseHits.length;
+    reasons.push(`weakest phase: ${phaseHits.map(phaseLabel).join(', ')}`);
+  }
+  component.phases.forEach(p => {
+    const st = lcc.phaseStats ? lcc.phaseStats[p] : null;
+    if(st && st.n > 0 && st.median != null && st.median < 3.5){
+      score += 1;
+      if(!phaseHits.includes(p)) reasons.push(`${phaseLabel(p)} is partial or inconsistent`);
+    }
+  });
+
+  const conditionHits = component.conditions.filter(d => priorityConditions.includes(d));
+  if(conditionHits.length){
+    score += 2 * conditionHits.length;
+    reasons.push(`weakest environment aspect: ${conditionHits.map(d => ENVIRONMENT_EMPHASIS[d]?.plain || d).join('; ')}`);
+  }
+
+  const signalHits = component.resourceSignals.filter(s => resourceSignals.has(s));
+  if(signalHits.length){
+    score += Math.min(3, signalHits.length);
+    reasons.push(`related resource/process gaps: ${signalHits.slice(0,3).join(', ')}`);
+  }
+
+  if(wideVariation && (component.title.includes('audits') || component.title.includes('meetings'))){
+    score += 2;
+    reasons.push('wide variation between respondent scores suggests a need for shared review and discussion');
+  }
+
+  return {score, reasons, priorityConditions, priorityPhases};
+}
+function emphasisForComponent(component, priorityConditions){
+  const hits = component.conditions.filter(d => priorityConditions.includes(d));
+  const targets = hits.length ? hits : component.conditions.slice(0,1);
+  return targets.map(d => ENVIRONMENT_EMPHASIS[d]?.emphasis).filter(Boolean);
+}
 function renderComponentChips(components){
   return `<div class="component-chip-row">${components.map(c=>`<span class="component-chip">${esc(c)}</span>`).join('')}</div>`;
+}
+function renderSuggestedInterventionComponents(lcc, actionRows){
+  const hasScores = Object.values(lcc.phaseStats || {}).some(st => st && st.n > 0);
+  if(!hasScores){
+    return `<div class="action-empty"><b>No Environment scores yet.</b><br><span class="muted">Add one or more Environment respondents to highlight the intervention components most relevant to this facility.</span></div>`;
+  }
+  const scored = INTERVENTION_COMPONENTS.map(c => ({component:c, ...scoreComponentRelevance(c,lcc,actionRows)}))
+    .sort((a,b) => b.score - a.score || a.component.title.localeCompare(b.component.title));
+  const top = scored.filter(x => x.score > 0).slice(0,5);
+  const selected = top.length ? top : scored.slice(0,3);
+  return selected.map(x => {
+    const c = x.component;
+    const p = phasePriorityLabel(x.score >= 6 ? 2 : x.score >= 3 ? 3 : 4);
+    const emphasis = emphasisForComponent(c, x.priorityConditions);
+    const reasons = x.reasons.length ? x.reasons : ['closest match to current facility scores'];
+    return `<div class="intervention-card ${p.cls}">
+      <div class="intervention-head">
+        <div>
+          <span class="phase-badge">Suggested component</span>
+          <h4>${esc(c.title)}</h4>
+        </div>
+        <div class="intervention-score"><span class="action-chip">Relevance score ${x.score}</span></div>
+      </div>
+      <p><b>Why this is highlighted:</b> ${reasons.map(esc).join('; ')}.</p>
+      <p><b>What this component is for:</b> ${esc(c.summary)}</p>
+      <p><b>What to emphasise in this facility:</b></p>
+      <ul>${[...emphasis, ...c.focus.slice(0,3)].slice(0,5).map(a=>`<li>${esc(a)}</li>`).join('')}</ul>
+    </div>`;
+  }).join('');
 }
 function renderPhaseInterventionCards(lcc){
   const priorities = scoredPriorityItems(lcc.phaseStats, PHASE_ORDER);
   if(!priorities.length){
-    return `<div class="action-empty"><b>No Environment scores yet.</b><br><span class="muted">Add one or more Environment respondents to generate phase-based intervention suggestions.</span></div>`;
+    return `<div class="action-empty"><b>No Environment scores yet.</b><br><span class="muted">Add one or more Environment respondents to generate phase-based interpretation.</span></div>`;
   }
   return priorities.map(x => {
-    const info = REVIEW_PHASE_INTERVENTIONS[x.key];
+    const info = PHASE_INTERVENTION_NEEDS[x.key];
     const p = phasePriorityLabel(x.st.median);
-    const label = x.key.charAt(0)+x.key.slice(1).toLowerCase();
+    const label = phaseLabel(x.key);
     return `<div class="intervention-card ${p.cls}">
       <div class="intervention-head">
         <div>
@@ -1754,53 +1921,17 @@ function renderPhaseInterventionCards(lcc){
         <div class="intervention-score">${scoreDistributionGraphic(x.st,'phase')}</div>
       </div>
       <p><b>What this may mean here:</b> ${esc(info.meaning)}</p>
-      <p><b>Intervention components to discuss:</b></p>
-      ${renderComponentChips(info.components)}
-      <p><b>Possible local adaptations:</b></p>
-      <ul>${info.actions.map(a=>`<li>${esc(a)}</li>`).join('')}</ul>
-    </div>`;
-  }).join('');
-}
-function renderDomainInterventionCards(lcc){
-  const priorities = scoredPriorityItems(lcc.domainStats, DOMAIN_ORDER);
-  if(!priorities.length){
-    return `<div class="action-empty"><b>No Environment condition scores yet.</b><br><span class="muted">Add one or more respondents to generate Legitimacy, Capability and Connectedness suggestions.</span></div>`;
-  }
-  return priorities.map(x => {
-    const info = REVIEW_DOMAIN_INTERVENTIONS[x.key];
-    const p = phasePriorityLabel(x.st.median);
-    return `<div class="intervention-card ${p.cls}">
-      <div class="intervention-head">
-        <div>
-          <span class="phase-badge">${esc(x.key)}</span>
-          <h4>Strengthen ${esc(x.key)}</h4>
-        </div>
-        <div class="intervention-score">${scoreDistributionGraphic(x.st,distributionClass(x.key))}</div>
-      </div>
-      <p><b>What this may mean here:</b> ${esc(info.meaning)}</p>
-      <p><b>Intervention components to discuss:</b></p>
-      ${renderComponentChips(info.components)}
-      <p><b>Possible local adaptations:</b></p>
+      <p><b>Useful design emphasis:</b></p>
       <ul>${info.actions.map(a=>`<li>${esc(a)}</li>`).join('')}</ul>
     </div>`;
   }).join('');
 }
 function renderInterventionLibraryOverview(){
-  const components = [
-    {title:'Dedicated space / signage', domains:['Legitimacy','Capability','Connectedness'], text:'Signals that emergency care is a formal priority, supports timely decision-making, and can clarify team roles when linked to processes.'},
-    {title:'Triage systems and triage roles', domains:['Legitimacy','Capability','Connectedness'], text:'Formalises urgency, structures clinical reasoning, and creates a shared language of prioritisation across cadres.'},
-    {title:'Clinical guidelines and protocols', domains:['Legitimacy','Capability','Connectedness'], text:'Clarifies accepted scope of practice, provides decision support, and creates shared expectations for emergency work.'},
-    {title:'Standardised records / track-and-trigger charts', domains:['Legitimacy','Capability','Connectedness'], text:'Prompts systematic assessment, improves information sharing, and supports escalation when deterioration is detected.'},
-    {title:'Training, simulation and work-based practice', domains:['Capability','Connectedness'], text:'Builds knowledge, skills and confidence, especially when repeated, practical, team-based and connected to feedback.'},
-    {title:'Task-shifting with supervision', domains:['Legitimacy','Capability','Connectedness'], text:'Can redefine accepted roles and improve timely action when formally authorised, trained, resourced and embedded in team workflows.'},
-    {title:'Supervision, mentorship and champions', domains:['Legitimacy','Capability','Connectedness'], text:'Reinforces expected behaviours, corrects errors, builds confidence and can bridge teams, cadres and units.'},
-    {title:'Audit, feedback and shared problem-solving', domains:['Legitimacy','Connectedness'], text:'Makes performance visible, creates learning routines, and supports collective ownership when psychologically safe.'}
-  ];
-  const chip = d => `<span class="component-chip ${esc(d.toLowerCase())}">${esc(d)}</span>`;
-  return `<div class="intervention-component-grid">${components.map(c=>`<div class="intervention-component-card">
+  return `<div class="intervention-component-grid">${INTERVENTION_COMPONENTS.map(c=>`<div class="intervention-component-card">
     <h4>${esc(c.title)}</h4>
-    <div class="component-chip-row">${c.domains.map(chip).join('')}</div>
-    <p>${esc(c.text)}</p>
+    <p>${esc(c.summary)}</p>
+    <p><b>Useful emphasis:</b></p>
+    <ul>${c.focus.slice(0,3).map(a=>`<li>${esc(a)}</li>`).join('')}</ul>
   </div>`).join('')}</div>`;
 }
 
@@ -1878,18 +2009,17 @@ function renderLccInterventionMap(lcc, wardScores=[], actionRows=[]){
 
     <div class="panel">
       <h3>2. Specific interventions: what the results may mean for this facility</h3>
-      <div class="intervention-intro-note">These suggestions are generated from the weakest phase of care and weakest Environment condition. They are intended to support local discussion and adaptation, not prescribe a fixed package.</div>
+      <div class="intervention-intro-note">These suggestions use the weakest phase of care, the weakest Environment aspect and the resource-gap summary to highlight a small number of intervention components for local discussion. They are not a fixed package.</div>
+      <h4>Most relevant intervention components to discuss</h4>
+      ${renderSuggestedInterventionComponents(lcc, actionRows)}
       <h4>Priority based on phase of care</h4>
       ${renderPhaseInterventionCards(lcc)}
-      <h4>Priority based on Environment condition</h4>
-      ${renderDomainInterventionCards(lcc)}
     </div>
 
     <div class="panel">
-      <h3>3. Intervention components from the review</h3>
-      <p>Use this library to choose and adapt a small number of feasible interventions. The same component can strengthen different aspects of the work environment depending on how it is implemented.</p>
+      <h3>3. Intervention component options</h3>
+      <p>Use this list to choose and adapt a small number of feasible interventions. The useful part of each component depends on what the facility is trying to change: patient flow, recognition, urgent action, monitoring, escalation, team communication or learning routines.</p>
       ${renderInterventionLibraryOverview()}
-      <div class="evidence-note">Intervention components are drawn from the realist synthesis and mapped to Legitimacy, Capability and Connectedness. The review emphasises that there is no single gold-standard intervention; intervention choice should be context-dependent and based on local resources, constraints and priorities.</div>
     </div>
 
     <div class="panel">
@@ -2043,7 +2173,7 @@ document.getElementById('downloadJson').addEventListener('click',()=>download('f
 document.getElementById('downloadCsv').addEventListener('click',()=>download('facility-diagnostic-tool-summary.csv',makeCsv(),'text/csv'));
 document.getElementById('clearAll').addEventListener('click',()=>{ if(confirm('Clear all saved data in this browser?')){ localStorage.removeItem(STORE_KEY); state=defaultState(); activeWardIndex=0; activeRespondentIndex=0; renderAll(); } });
 window.__diagnosticTool = {state, eecc, lccQuestions, calculateFacilityAvailabilityScore, calculateWardReadinessScore, calculateLccSummary, renderAll};
-try { renderAll(); document.getElementById('loadStatus').innerHTML='<div class="instruction-box success-box"><b>Loaded:</b> EECC facility rows 34/34, ward rows 35/35, LCC items 7/7. Single-file v42.</div>'; } catch(e){ console.error(e); document.getElementById('loadStatus').innerHTML=`<div class="instruction-box error-box"><b>Loading error:</b> ${esc(e.message)}</div>`; }
+try { renderAll(); document.getElementById('loadStatus').innerHTML='<div class="instruction-box success-box"><b>Loaded:</b> EECC facility rows 34/34, ward rows 35/35, LCC items 7/7. Single-file v43.</div>'; } catch(e){ console.error(e); document.getElementById('loadStatus').innerHTML=`<div class="instruction-box error-box"><b>Loading error:</b> ${esc(e.message)}</div>`; }
 </script>
 </body>
 </html>
