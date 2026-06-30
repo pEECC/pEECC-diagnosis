@@ -952,6 +952,31 @@ input, select, textarea{
   .intervention-card .score-distribution{min-width:0;}
 }
 
+
+.intervention-summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:10px 0 16px;}
+.intervention-summary-card{border:1px solid var(--border);border-radius:10px;padding:12px;background:#fff;}
+.intervention-summary-card h4{margin:0 0 6px;font-size:14px;}
+.intervention-summary-card .big{font-size:18px;font-weight:700;}
+.intervention-summary-card .sub{font-size:12px;color:var(--muted);margin-top:4px;}
+.intervention-summary-card ul{margin:6px 0 0 18px;padding:0;}
+.intervention-matrix-wrap{overflow-x:auto;margin-top:8px;}
+.table-note{font-size:12px;color:var(--muted);margin:6px 0 0;}
+.intervention-matrix{width:100%;border-collapse:collapse;font-size:13px;}
+.intervention-matrix th,.intervention-matrix td{border:1px solid var(--border);padding:8px 8px;vertical-align:middle;text-align:center;word-break:break-word;}
+.intervention-matrix th:first-child,.intervention-matrix td:first-child{text-align:left;min-width:220px;}
+.intervention-matrix th.matrix-priority,.intervention-matrix td.matrix-priority{background:#eef5ff;}
+.intervention-matrix .marker-strong{font-size:18px;line-height:1;color:#111;display:inline-block;}
+.intervention-matrix .marker-important{font-size:18px;line-height:1;color:#666;display:inline-block;}
+.intervention-matrix .empty{color:#ccc;}
+.matrix-legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin:8px 0;}
+.matrix-legend span{display:inline-flex;align-items:center;gap:6px;}
+.matrix-domain-head{white-space:nowrap;}
+.matrix-row-title{font-weight:600;}
+@media (max-width: 700px){
+  .intervention-matrix th,.intervention-matrix td{padding:6px;font-size:12px;}
+  .intervention-matrix th:first-child,.intervention-matrix td:first-child{min-width:170px;}
+}
+
 </style>
 </head>
 <body>
@@ -1594,83 +1619,93 @@ const ENVIRONMENT_EMPHASIS = {
 const INTERVENTION_COMPONENTS = [
   {
     title:'Emergency space and patient-flow redesign',
-    phases:['ENTRY','RESPONSE'],
-    conditions:['Legitimacy','Connectedness'],
-    resourceSignals:['Space','Access','Triage'],
-    summary:'Creates a predictable route for sick children from arrival to assessment, stabilisation, observation, admission, transfer or referral.',
-    focus:['Define where sick children go first and who receives them.','Separate urgent care from routine queues where feasible.','Make movement between OPD/emergency, ward, maternity/neonatal areas and referral points explicit.']
+    phasePrimary:['ENTRY','RECOGNITION'],
+    phaseSecondary:[],
+    conditionPrimary:['Legitimacy','Connectedness'],
+    conditionSecondary:[],
+    phases:['ENTRY','RECOGNITION'],
+    conditions:['Legitimacy','Connectedness']
   },
   {
     title:'Triage systems and triager role',
+    phasePrimary:['ENTRY','RECOGNITION'],
+    phaseSecondary:[],
+    conditionPrimary:['Legitimacy','Capability','Connectedness'],
+    conditionSecondary:[],
     phases:['ENTRY','RECOGNITION'],
-    conditions:['Legitimacy','Capability','Connectedness'],
-    resourceSignals:['Triage','Guideline'],
-    summary:'Formalises prioritisation by acuity and gives staff a shared language for urgency.',
-    focus:['Define the triager role and who covers it after hours.','Keep the tool short enough to use at first contact.','Link triage category to a clear response, not only a label.']
+    conditions:['Legitimacy','Capability','Connectedness']
   },
   {
     title:'Clinical guidelines and protocols',
+    phasePrimary:['RECOGNITION','RESPONSE'],
+    phaseSecondary:['CONTINUITY'],
+    conditionPrimary:['Legitimacy','Capability'],
+    conditionSecondary:['Connectedness'],
     phases:['RECOGNITION','RESPONSE','CONTINUITY'],
-    conditions:['Legitimacy','Capability','Connectedness'],
-    resourceSignals:['Guideline','Escalation'],
-    summary:'Clarifies expected actions for common emergency presentations and supports treatment before diagnosis is complete.',
-    focus:['Prioritise high-risk presentations such as hypoxaemia, shock, seizures, altered consciousness and neonatal danger signs.','Specify first actions that can begin while awaiting senior review.','Place protocols where care is delivered and link them to available resources.']
+    conditions:['Legitimacy','Capability','Connectedness']
   },
   {
     title:'Routine oxygen saturation',
+    phasePrimary:['RECOGNITION'],
+    phaseSecondary:['RESPONSE','CONTINUITY'],
+    conditionPrimary:['Capability'],
+    conditionSecondary:['Connectedness'],
     phases:['RECOGNITION','RESPONSE','CONTINUITY'],
-    conditions:['Capability'],
-    resourceSignals:['Oxygen','Monitoring','Pulse oximeter','SpO2'],
-    summary:'Makes hypoxaemia visible and creates a trigger for oxygen, escalation and reassessment.',
-    focus:['Make SpO₂ a routine vital sign for sick children and high-risk admissions.','Ensure pulse oximeters and child/neonatal probes are available where children are assessed.','Define what staff should do when SpO₂ is low or cannot be measured.']
+    conditions:['Capability','Connectedness']
   },
   {
     title:'Standardised admission form',
+    phasePrimary:['RECOGNITION'],
+    phaseSecondary:['RESPONSE','CONTINUITY'],
+    conditionPrimary:['Capability'],
+    conditionSecondary:['Connectedness'],
     phases:['RECOGNITION','RESPONSE','CONTINUITY'],
-    conditions:['Capability','Connectedness'],
-    resourceSignals:['Monitoring','Record'],
-    summary:'Prompts systematic assessment, reduces omissions and improves information sharing during admission and handover.',
-    focus:['Include danger signs, complete vital signs, SpO₂, treatments started, pending tasks and escalation plan.','Keep the form usable during busy periods.','Use it to communicate risk across shifts and locations.']
+    conditions:['Capability','Connectedness']
   },
   {
     title:'Track-and-trigger monitoring charts',
+    phasePrimary:['CONTINUITY'],
+    phaseSecondary:['RESPONSE'],
+    conditionPrimary:['Legitimacy'],
+    conditionSecondary:['Capability','Connectedness'],
     phases:['CONTINUITY','RESPONSE'],
-    conditions:['Legitimacy','Capability','Connectedness'],
-    resourceSignals:['Monitoring','Escalation','Vital signs'],
-    summary:'Supports ongoing reassessment and turns deterioration into a clear escalation trigger.',
-    focus:['Define minimum monitoring frequency for high-risk children.','Use clear thresholds for escalation and senior review.','Make escalation safe and expected for nurses, midwives and junior clinicians.']
+    conditions:['Legitimacy','Capability','Connectedness']
   },
   {
     title:'In-service training and simulation',
-    phases:['RECOGNITION','RESPONSE'],
-    conditions:['Capability','Connectedness'],
-    resourceSignals:['Training'],
-    summary:'Builds practical skill and confidence, especially when it is short, repeated, scenario-based and connected to local workflows.',
-    focus:['Target training to the weakest phase of care rather than broad teaching alone.','Use local cases and the actual equipment available on the ward.','Practise team roles, communication and escalation, not only technical skills.']
+    phasePrimary:['RECOGNITION','RESPONSE'],
+    phaseSecondary:['CONTINUITY'],
+    conditionPrimary:['Capability'],
+    conditionSecondary:['Connectedness'],
+    phases:['RECOGNITION','RESPONSE','CONTINUITY'],
+    conditions:['Capability','Connectedness']
   },
   {
     title:'Task-shifting with supervision',
-    phases:['ENTRY','RESPONSE','CONTINUITY'],
-    conditions:['Legitimacy','Capability','Connectedness'],
-    resourceSignals:['Staffing','Training','Escalation'],
-    summary:'Allows timely first actions when the usual authorised staff member is absent or delayed, but only when scope, support and supervision are clear.',
-    focus:['Specify which cadres can start which emergency actions.','Pair expanded roles with training, protocols and access to senior advice.','Avoid “everyone’s role, no one’s responsibility” by defining accountability and handover.']
+    phasePrimary:['RESPONSE'],
+    phaseSecondary:['RECOGNITION','CONTINUITY'],
+    conditionPrimary:['Legitimacy','Capability'],
+    conditionSecondary:['Connectedness'],
+    phases:['RECOGNITION','RESPONSE','CONTINUITY'],
+    conditions:['Legitimacy','Capability','Connectedness']
   },
   {
     title:'Morbidity and mortality audits',
-    phases:['CONTINUITY'],
-    conditions:['Legitimacy','Connectedness'],
-    resourceSignals:['Variation','Escalation'],
-    summary:'Creates a structured learning routine to identify avoidable delays, missed escalation and system failures.',
-    focus:['Keep the discussion blame-aware and focused on systems, not individual fault.','Track a small number of agreed actions after each audit.','Include near-misses and deterioration events, not only deaths.']
+    phasePrimary:['RECOGNITION','RESPONSE','CONTINUITY'],
+    phaseSecondary:[],
+    conditionPrimary:['Legitimacy','Connectedness'],
+    conditionSecondary:['Capability'],
+    phases:['RECOGNITION','RESPONSE','CONTINUITY'],
+    conditions:['Legitimacy','Connectedness','Capability']
   },
   {
     title:'Inter-disciplinary clinical meetings',
-    phases:['RESPONSE','CONTINUITY'],
-    conditions:['Connectedness'],
-    resourceSignals:['Variation','Handover'],
-    summary:'Builds shared understanding across cadres and units about how sick-child care should work.',
-    focus:['Include the people who shape the child’s journey: OPD/emergency, ward, maternity/neonatal staff, pharmacy, laboratory, records and transport where relevant.','Use meetings to agree practical changes to roles, handover, escalation and resource workarounds.','Return to the diagnostic scores to check whether relationships and routines are improving.']
+    phasePrimary:['RECOGNITION','RESPONSE','CONTINUITY'],
+    phaseSecondary:[],
+    conditionPrimary:['Legitimacy','Connectedness'],
+    conditionSecondary:['Capability'],
+    phases:['RECOGNITION','RESPONSE','CONTINUITY'],
+    conditions:['Legitimacy','Connectedness','Capability']
   }
 ];
 
@@ -1969,63 +2004,78 @@ function renderConditionsInterpretation(lcc){
     const st = lcc.domainStats[d] || {n:0};
     return `<tr><td data-label="Condition">${conditionChip(d)}</td><td data-label="Score distribution">${scoreDistributionGraphic(st,distributionClass(d))}<div class="score-note">n=${st.n || 0}</div></td><td data-label="Interpretation">${esc(scoreInterpretation(st))}</td><td data-label="What this means">${esc(domainInfo[d].meaning)}</td></tr>`;
   }).join('');
-  const variationRows = DOMAIN_ORDER.map(d => {
-    const st = lcc.domainStats[d] || {n:0};
-    const values = Array.isArray(st.values) ? st.values : [];
-    const spread = values.length ? Math.max(...values) - Math.min(...values) : null;
-    const note = spread == null ? 'No score yet' : spread >= 2 ? 'Wide variation — discuss role, shift or location differences' : 'Limited to moderate variation';
-    return `<tr><td data-label="Condition">${conditionChip(d)}</td><td data-label="n">${st.n || 0}</td><td data-label="Score distribution">${scoreDistributionGraphic(st,distributionClass(d))}</td><td data-label="Interpretation">${esc(note)}</td></tr>`;
-  }).join('');
-  const cadreVariationItems = [];
-  DOMAIN_ORDER.forEach(d => {
-    const groups = {};
-    lcc.respondents.forEach(r => {
-      const score = r.domains ? r.domains[d] : null;
-      if(score == null || Number.isNaN(score)) return;
-      const role = (r.respondent && r.respondent.role ? r.respondent.role : '').trim() || 'Respondent group/role not specified';
-      if(!groups[role]) groups[role] = [];
-      groups[role].push(score);
-    });
-    Object.entries(groups).forEach(([role, scores]) => cadreVariationItems.push({condition:d, role, stats:stats(scores)}));
-  });
-  const cadreVariationRows = cadreVariationItems.length ? cadreVariationItems.map(x => `<tr><td data-label="Condition">${conditionChip(x.condition)}</td><td data-label="Respondent group / cadre">${esc(x.role)}</td><td data-label="n">${x.stats.n}</td><td data-label="Score distribution">${scoreDistributionGraphic(x.stats,distributionClass(x.condition))}</td></tr>`).join('') : `<tr><td colspan="4" class="muted">No respondent group/role data available yet.</td></tr>`;
   return `<div class="priority-callout"><h4>1. Environment by phase of care</h4><p class="environment-section-intro">This view shows where the hospital environment is strongest or weakest along the child's journey.</p>${scoreDistributionLegend()}</div>
     <table class="phase-condition-table responsive-table"><thead><tr><th>Phase of care</th><th>Score distribution</th><th>Interpretation</th><th>What this means</th></tr></thead><tbody>${phaseRows}</tbody></table>
     <div class="priority-callout"><h4>2. Environment by condition</h4><p class="environment-section-intro">This view summarises the three environmental conditions across the whole patient journey.</p>${scoreDistributionLegend()}</div>
-    <table class="phase-condition-table responsive-table"><thead><tr><th>Condition</th><th>Score distribution</th><th>Interpretation</th><th>What this means</th></tr></thead><tbody>${conditionRows}</tbody></table>
-    <div class="priority-callout"><h4>3. Variation in scoring for Legitimacy, Capability and Connectedness</h4><p class="environment-section-intro">This section shows both the overall spread across respondents and whether different respondent groups experience the work environment differently. Wide ranges can prompt discussion about differences between roles, shifts, locations, or levels of authority.</p>${scoreDistributionLegend()}</div>
-    <h4>Overall variation across respondents</h4>
-    <table class="phase-condition-table responsive-table"><thead><tr><th>Condition</th><th>n</th><th>Score distribution</th><th>Interpretation</th></tr></thead><tbody>${variationRows}</tbody></table>
-    <h4>Variation by respondent group / cadre</h4>
-    <table class="phase-condition-table responsive-table"><thead><tr><th>Condition</th><th>Respondent group / cadre</th><th>n</th><th>Score distribution</th></tr></thead><tbody>${cadreVariationRows}</tbody></table>`;
+    <table class="phase-condition-table responsive-table"><thead><tr><th>Condition</th><th>Score distribution</th><th>Interpretation</th><th>What this means</th></tr></thead><tbody>${conditionRows}</tbody></table>`;
+}
+
+function shortPhaseList(keys){
+  return (keys || []).map(k => phaseLabel(k)).join(', ');
+}
+function shortDomainList(keys){
+  return (keys || []).join(', ');
+}
+function matrixMarker(kind){
+  if(kind === 'strong') return '<span class="marker-strong" aria-label="Especially relevant">●</span>';
+  if(kind === 'important') return '<span class="marker-important" aria-label="Important">○</span>';
+  return '<span class="empty">&nbsp;</span>';
+}
+function matrixCell(component, key, type, prioritySet){
+  const strong = type === 'phase' ? (component.phasePrimary || []).includes(key) : (component.conditionPrimary || []).includes(key);
+  const important = type === 'phase' ? (component.phaseSecondary || []).includes(key) : (component.conditionSecondary || []).includes(key);
+  const cls = prioritySet.has(key) ? 'matrix-priority' : '';
+  return `<td class="${cls}">${matrixMarker(strong ? 'strong' : important ? 'important' : '')}</td>`;
+}
+function renderInterventionMatrix(lcc){
+  const priorityPhases = new Set(weakestKeys(lcc.phaseStats || {}, PHASE_ORDER));
+  const priorityDomains = new Set(weakestKeys(lcc.domainStats || {}, DOMAIN_ORDER));
+  const phaseHeads = PHASE_ORDER.map(p => `<th class="${priorityPhases.has(p)?'matrix-priority':''}">${esc(phaseLabel(p))}</th>`).join('');
+  const domainHeads = DOMAIN_ORDER.map(d => `<th class="matrix-domain-head ${priorityDomains.has(d)?'matrix-priority':''}">${esc(d)}</th>`).join('');
+  const rows = INTERVENTION_COMPONENTS.map(c => `<tr>
+      <td class="matrix-row-title">${esc(c.title)}</td>
+      ${PHASE_ORDER.map(p => matrixCell(c,p,'phase',priorityPhases)).join('')}
+      ${DOMAIN_ORDER.map(d => matrixCell(c,d,'condition',priorityDomains)).join('')}
+    </tr>`).join('');
+  return `<div class="matrix-legend"><span>${matrixMarker('strong')} Especially relevant</span><span>${matrixMarker('important')} Important</span></div>
+    <div class="intervention-matrix-wrap">
+      <table class="intervention-matrix"><thead><tr><th>Intervention</th>${phaseHeads}${domainHeads}</tr></thead><tbody>${rows}</tbody></table>
+    </div>
+    <div class="table-note">Highlighted columns show the current priority phase(s) of care and priority environment area(s).</div>`;
 }
 
 function renderLccInterventionMap(lcc, wardScores=[], actionRows=[]){
+  const priorityPhases = weakestKeys(lcc.phaseStats || {}, PHASE_ORDER);
+  const priorityDomains = weakestKeys(lcc.domainStats || {}, DOMAIN_ORDER);
+  const resourcePanel = renderResourceReviewInterventions(wardScores, actionRows);
+  const phaseText = priorityPhases.length ? shortPhaseList(priorityPhases) : 'No Environment scores yet';
+  const domainText = priorityDomains.length ? shortDomainList(priorityDomains) : 'No Environment scores yet';
   return `<div class="panel">
-      <h3>1. Review resourcing for essential emergency and critical care</h3>
-      <p>Before selecting workflow, behavioural, training or team-based interventions, review whether priority wards/units have the essential resources required for emergency and critical care. This section identifies the wards/units to review first; the detailed item-by-item gaps remain under <b>Interpretation - resources</b>.</p>
-      ${renderResourceReviewInterventions(wardScores, actionRows)}
+      <h3>1. Resources needed</h3>
+      <p class="intervention-section-note">Review priority wards/units for essential emergency and critical care resources. See <b>Interpretation - resources</b> for the detailed list of gaps.</p>
+      ${resourcePanel}
     </div>
 
     <div class="panel">
-      <h3>2. Specific interventions: what the results may mean for this facility</h3>
-      <div class="intervention-intro-note">These suggestions use the weakest phase of care, the weakest Environment aspect and the resource-gap summary to highlight a small number of intervention components for local discussion. They are not a fixed package.</div>
-      <h4>Most relevant intervention components to discuss</h4>
-      ${renderSuggestedInterventionComponents(lcc, actionRows)}
-      <h4>Priority based on phase of care</h4>
-      ${renderPhaseInterventionCards(lcc)}
+      <h3>2. Diagnostic focus</h3>
+      <div class="intervention-summary-grid">
+        <div class="intervention-summary-card">
+          <h4>Phase of care focus</h4>
+          <div class="big">${esc(phaseText)}</div>
+          <div class="sub">Focus first on the earliest weak phase of care.</div>
+        </div>
+        <div class="intervention-summary-card">
+          <h4>Priority environment area</h4>
+          <div class="big">${esc(domainText)}</div>
+          <div class="sub">Strengthen the aspect of the work environment with the lowest median score.</div>
+        </div>
+      </div>
     </div>
 
     <div class="panel">
-      <h3>3. Intervention component options</h3>
-      <p>Use this list to choose and adapt a small number of feasible interventions. The useful part of each component depends on what the facility is trying to change: patient flow, recognition, urgent action, monitoring, escalation, team communication or learning routines.</p>
-      ${renderInterventionLibraryOverview()}
-    </div>
-
-    <div class="panel">
-      <h3>Sequencing principle</h3>
-      <p><b>Start with the earliest weak phase and the simplest feasible intervention.</b> Resource gaps identify what is missing. Environment scores help explain whether staff, routines, roles and relationships support people to care for the sick child.</p>
-      <p class="muted">If respondent scores vary widely, use that variation as a facilitated discussion trigger before choosing interventions. Avoid choosing too many interventions at once.</p>
+      <h3>3. Intervention options</h3>
+      <p class="intervention-section-note">Use this matrix to identify interventions most aligned with the current results.</p>
+      ${renderInterventionMatrix(lcc)}
     </div>`;
 }
 
@@ -2173,7 +2223,7 @@ document.getElementById('downloadJson').addEventListener('click',()=>download('f
 document.getElementById('downloadCsv').addEventListener('click',()=>download('facility-diagnostic-tool-summary.csv',makeCsv(),'text/csv'));
 document.getElementById('clearAll').addEventListener('click',()=>{ if(confirm('Clear all saved data in this browser?')){ localStorage.removeItem(STORE_KEY); state=defaultState(); activeWardIndex=0; activeRespondentIndex=0; renderAll(); } });
 window.__diagnosticTool = {state, eecc, lccQuestions, calculateFacilityAvailabilityScore, calculateWardReadinessScore, calculateLccSummary, renderAll};
-try { renderAll(); document.getElementById('loadStatus').innerHTML='<div class="instruction-box success-box"><b>Loaded:</b> EECC facility rows 34/34, ward rows 35/35, LCC items 7/7. Single-file v43.</div>'; } catch(e){ console.error(e); document.getElementById('loadStatus').innerHTML=`<div class="instruction-box error-box"><b>Loading error:</b> ${esc(e.message)}</div>`; }
+try { renderAll(); document.getElementById('loadStatus').innerHTML='<div class="instruction-box success-box"><b>Loaded:</b> EECC facility rows 34/34, ward rows 35/35, LCC items 7/7. Single-file v44.</div>'; } catch(e){ console.error(e); document.getElementById('loadStatus').innerHTML=`<div class="instruction-box error-box"><b>Loading error:</b> ${esc(e.message)}</div>`; }
 </script>
 </body>
 </html>
