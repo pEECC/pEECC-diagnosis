@@ -1027,6 +1027,16 @@ function phasePriorityLabel(score){
   return {label:'Relative strength — maintain and learn from this area', cls:'priority-low'};
 }
 
+function scoreMedianText(st){
+  if(!st || st.n===0 || st.median==null) return '—';
+  return `${formatScore(st.median)} / 5`;
+}
+function scoreRangeText(st){
+  if(!st || st.n===0 || !Array.isArray(st.values) || !st.values.length) return '—';
+  const min = Math.min(...st.values);
+  const max = Math.max(...st.values);
+  return `${formatScore(min)}–${formatScore(max)} / 5`;
+}
 function renderRespondentRoleScores(items){
   if(!items.length) return `<p class="small">No respondent group/role data available.</p>`;
   const groups = {};
@@ -1037,11 +1047,9 @@ function renderRespondentRoleScores(items){
   });
   const rows = Object.entries(groups).map(([role, scores]) => {
     const s = stats(scores);
-    const min = scores.length ? Math.min(...scores) : null;
-    const max = scores.length ? Math.max(...scores) : null;
-    return `<tr><td>${esc(role)}</td><td>${scores.length}</td><td>${scoreIqrText(s)} / 5</td><td>${min==null?'—':`${formatScore(min)}–${formatScore(max)}`}</td></tr>`;
+    return `<tr><td>${esc(role)}</td><td>${scores.length}</td><td>${scoreMedianText(s)}</td><td>${scoreRangeText(s)}</td></tr>`;
   }).join('');
-  return `<table class="role-score-table"><thead><tr><th>Respondent group/role</th><th>n</th><th>Median (IQR)</th><th>Range</th></tr></thead><tbody>${rows}</tbody></table>`;
+  return `<table class="role-score-table"><thead><tr><th>Respondent group/role</th><th>n</th><th>Median</th><th>Range</th></tr></thead><tbody>${rows}</tbody></table>`;
 }
 
 function conditionChip(name){
@@ -1090,11 +1098,10 @@ function renderConditionsInterpretation(lcc){
   const phaseRows = PHASE_ORDER.map(p => {
     const st = lcc.phaseStats[p] || {n:0};
     const label = p.charAt(0)+p.slice(1).toLowerCase();
-    const chips = phaseConditionNames(p).map(conditionChip).join(' ');
     return `<tr>
       <td><b>${esc(label)}</b></td>
-      <td>${chips}</td>
-      <td>${scoreIqrText(st)}${st.n?`<div class="score-note">n=${st.n}</div>`:''}</td>
+      <td>${scoreMedianText(st)}${st.n?`<div class="score-note">n=${st.n}</div>`:''}</td>
+      <td>${scoreRangeText(st)}</td>
       <td>${esc(scoreInterpretation(st))}</td>
       <td>${esc(phaseMeaning[p])}</td>
     </tr>`;
@@ -1104,44 +1111,44 @@ function renderConditionsInterpretation(lcc){
     const st = lcc.domainStats[d] || {n:0};
     return `<tr>
       <td>${conditionChip(d)}</td>
-      <td>${scoreIqrText(st)}${st.n?`<div class="score-note">n=${st.n}</div>`:''}</td>
+      <td>${scoreMedianText(st)}${st.n?`<div class="score-note">n=${st.n}</div>`:''}</td>
+      <td>${scoreRangeText(st)}</td>
       <td>${esc(scoreInterpretation(st))}</td>
       <td>${esc(domainInfo[d].meaning)}</td>
     </tr>`;
   }).join('');
 
-  const variationCards = DOMAIN_ORDER.map(d => {
+  const variationRows = DOMAIN_ORDER.map(d => {
     const st = lcc.domainStats[d] || {n:0};
-    const respondentItems = lcc.respondents.map(r => ({
-      role: r.respondent ? r.respondent.role : '',
-      score: r.domains ? r.domains[d] : null
-    })).filter(r => r.score != null && !Number.isNaN(r.score));
-    const wide = st && st.iqr != null && st.iqr >= 1.5;
-    return `<div class="variation-card">
-      <h4>${conditionChip(d)} ${wide?'<span class="spread-high">Wide variation</span>':''}</h4>
-      ${boxPlot(d, st, d.toLowerCase())}
-      <p class="score-note">${wide?'Respondents varied substantially on this condition. Use this as a discussion trigger before selecting interventions.':'Variation is shown to support discussion across respondent groups.'}</p>
-      ${renderRespondentRoleScores(respondentItems)}
-    </div>`;
+    const values = Array.isArray(st.values) ? st.values : [];
+    const spread = values.length ? Math.max(...values) - Math.min(...values) : null;
+    const note = spread == null ? 'No score yet' : spread >= 2 ? 'Wide variation — discuss role, shift or location differences' : 'Limited to moderate variation';
+    return `<tr>
+      <td>${conditionChip(d)}</td>
+      <td>${st.n || 0}</td>
+      <td>${scoreMedianText(st)}</td>
+      <td>${scoreRangeText(st)}</td>
+      <td>${esc(note)}</td>
+    </tr>`;
   }).join('');
 
   return `<div class="priority-callout">
       <h4>1. Environment by phase of care</h4>
-      <p class="environment-section-intro">This view shows where the hospital environment is strongest or weakest along the child's journey. The condition column shows which aspects of Legitimacy, Capability and Connectedness are most relevant to that phase.</p>
+      <p class="environment-section-intro">This view shows where the hospital environment is strongest or weakest along the child's journey.</p>
     </div>
-    <table class="phase-condition-table"><thead><tr><th>Phase of care</th><th>Relevant condition(s)</th><th>Median (IQR)</th><th>Interpretation</th><th>What this means</th></tr></thead><tbody>${phaseRows}</tbody></table>
+    <table class="phase-condition-table"><thead><tr><th>Phase of care</th><th>Median</th><th>Range</th><th>Interpretation</th><th>What this means</th></tr></thead><tbody>${phaseRows}</tbody></table>
 
     <div class="priority-callout">
       <h4>2. Environment by condition</h4>
       <p class="environment-section-intro">This view summarises the three contextual conditions across the whole patient journey.</p>
     </div>
-    <table class="phase-condition-table"><thead><tr><th>Condition</th><th>Median (IQR)</th><th>Interpretation</th><th>What this means</th></tr></thead><tbody>${conditionRows}</tbody></table>
+    <table class="phase-condition-table"><thead><tr><th>Condition</th><th>Median</th><th>Range</th><th>Interpretation</th><th>What this means</th></tr></thead><tbody>${conditionRows}</tbody></table>
 
     <div class="priority-callout">
       <h4>3. Variation in scoring for Legitimacy, Capability and Connectedness</h4>
-      <p class="environment-section-intro">The box plots and role tables show whether respondents experience the same environment differently. Wide variation may indicate an important difference between roles, shifts, locations, or levels of authority.</p>
+      <p class="environment-section-intro">This table shows the spread of scores across respondents using the median and full range. Wide ranges can prompt discussion about differences between roles, shifts, locations, or levels of authority.</p>
     </div>
-    <div class="variation-grid">${variationCards}</div>`;
+    <table class="phase-condition-table"><thead><tr><th>Condition</th><th>n</th><th>Median</th><th>Range</th><th>Interpretation</th></tr></thead><tbody>${variationRows}</tbody></table>`;
 }
 
 function renderLccInterventionMap(lcc){
