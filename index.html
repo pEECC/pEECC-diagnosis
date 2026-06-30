@@ -977,6 +977,20 @@ input, select, textarea{
   .intervention-matrix th:first-child,.intervention-matrix td:first-child{min-width:170px;}
 }
 
+
+/* v45: intervention matrix environment-column shading and compact cadre scores */
+.intervention-matrix th.domain-legitimacy,
+.intervention-matrix td.domain-legitimacy{background:var(--blue);}
+.intervention-matrix th.domain-capability,
+.intervention-matrix td.domain-capability{background:var(--green);}
+.intervention-matrix th.domain-connectedness,
+.intervention-matrix td.domain-connectedness{background:var(--purple);}
+.intervention-matrix th.matrix-priority,
+.intervention-matrix td.matrix-priority{box-shadow:inset 0 0 0 2px #244c7c;font-weight:800;}
+.intervention-matrix th.matrix-priority:not(.domain-legitimacy):not(.domain-capability):not(.domain-connectedness),
+.intervention-matrix td.matrix-priority:not(.domain-legitimacy):not(.domain-capability):not(.domain-connectedness){background:#eef5ff;}
+.cadre-score-note{font-size:12px;color:var(--muted);margin:6px 0 10px;}
+
 </style>
 </head>
 <body>
@@ -2004,10 +2018,35 @@ function renderConditionsInterpretation(lcc){
     const st = lcc.domainStats[d] || {n:0};
     return `<tr><td data-label="Condition">${conditionChip(d)}</td><td data-label="Score distribution">${scoreDistributionGraphic(st,distributionClass(d))}<div class="score-note">n=${st.n || 0}</div></td><td data-label="Interpretation">${esc(scoreInterpretation(st))}</td><td data-label="What this means">${esc(domainInfo[d].meaning)}</td></tr>`;
   }).join('');
+
+  const cadreRows = [];
+  DOMAIN_ORDER.forEach(d => {
+    const groups = {};
+    (lcc.respondents || []).forEach(r => {
+      const score = r.domains ? r.domains[d] : null;
+      if(score == null || Number.isNaN(score)) return;
+      const role = (r.respondent && r.respondent.role ? r.respondent.role : '').trim() || 'Respondent group/role not specified';
+      if(!groups[role]) groups[role] = [];
+      groups[role].push(score);
+    });
+    Object.entries(groups)
+      .sort((a,b)=>a[0].localeCompare(b[0]))
+      .forEach(([role, values]) => {
+        const st = stats(values);
+        cadreRows.push(`<tr><td data-label="Condition">${conditionChip(d)}</td><td data-label="Respondent group / cadre">${esc(role)}</td><td data-label="Score distribution">${scoreDistributionGraphic(st,distributionClass(d))}<div class="score-note">n=${st.n || 0}</div></td></tr>`);
+      });
+  });
+  const cadreTable = cadreRows.length
+    ? `<table class="phase-condition-table responsive-table"><thead><tr><th>Condition</th><th>Respondent group / cadre</th><th>Score distribution</th></tr></thead><tbody>${cadreRows.join('')}</tbody></table>`
+    : `<div class="action-empty"><span class="muted">No respondent group/cadre data available yet. Add respondent roles on the Environment page to display this section.</span></div>`;
+
   return `<div class="priority-callout"><h4>1. Environment by phase of care</h4><p class="environment-section-intro">This view shows where the hospital environment is strongest or weakest along the child's journey.</p>${scoreDistributionLegend()}</div>
     <table class="phase-condition-table responsive-table"><thead><tr><th>Phase of care</th><th>Score distribution</th><th>Interpretation</th><th>What this means</th></tr></thead><tbody>${phaseRows}</tbody></table>
     <div class="priority-callout"><h4>2. Environment by condition</h4><p class="environment-section-intro">This view summarises the three environmental conditions across the whole patient journey.</p>${scoreDistributionLegend()}</div>
-    <table class="phase-condition-table responsive-table"><thead><tr><th>Condition</th><th>Score distribution</th><th>Interpretation</th><th>What this means</th></tr></thead><tbody>${conditionRows}</tbody></table>`;
+    <table class="phase-condition-table responsive-table"><thead><tr><th>Condition</th><th>Score distribution</th><th>Interpretation</th><th>What this means</th></tr></thead><tbody>${conditionRows}</tbody></table>
+    <div class="priority-callout"><h4>3. Environment scores by respondent group / cadre</h4><p class="environment-section-intro">This view shows whether different cadres or respondent groups score the same environmental conditions differently.</p>${scoreDistributionLegend()}</div>
+    <div class="cadre-score-note">Use this to prompt discussion about differences between roles, shifts, locations or levels of authority.</div>
+    ${cadreTable}`;
 }
 
 function shortPhaseList(keys){
@@ -2021,17 +2060,23 @@ function matrixMarker(kind){
   if(kind === 'important') return '<span class="marker-important" aria-label="Important">○</span>';
   return '<span class="empty">&nbsp;</span>';
 }
+function domainMatrixClass(key){
+  if(key === 'Legitimacy') return 'domain-legitimacy';
+  if(key === 'Capability') return 'domain-capability';
+  if(key === 'Connectedness') return 'domain-connectedness';
+  return '';
+}
 function matrixCell(component, key, type, prioritySet){
   const strong = type === 'phase' ? (component.phasePrimary || []).includes(key) : (component.conditionPrimary || []).includes(key);
   const important = type === 'phase' ? (component.phaseSecondary || []).includes(key) : (component.conditionSecondary || []).includes(key);
-  const cls = prioritySet.has(key) ? 'matrix-priority' : '';
+  const cls = [prioritySet.has(key) ? 'matrix-priority' : '', type === 'condition' ? domainMatrixClass(key) : ''].filter(Boolean).join(' ');
   return `<td class="${cls}">${matrixMarker(strong ? 'strong' : important ? 'important' : '')}</td>`;
 }
 function renderInterventionMatrix(lcc){
   const priorityPhases = new Set(weakestKeys(lcc.phaseStats || {}, PHASE_ORDER));
   const priorityDomains = new Set(weakestKeys(lcc.domainStats || {}, DOMAIN_ORDER));
   const phaseHeads = PHASE_ORDER.map(p => `<th class="${priorityPhases.has(p)?'matrix-priority':''}">${esc(phaseLabel(p))}</th>`).join('');
-  const domainHeads = DOMAIN_ORDER.map(d => `<th class="matrix-domain-head ${priorityDomains.has(d)?'matrix-priority':''}">${esc(d)}</th>`).join('');
+  const domainHeads = DOMAIN_ORDER.map(d => `<th class="matrix-domain-head ${domainMatrixClass(d)} ${priorityDomains.has(d)?'matrix-priority':''}">${esc(d)}</th>`).join('');
   const rows = INTERVENTION_COMPONENTS.map(c => `<tr>
       <td class="matrix-row-title">${esc(c.title)}</td>
       ${PHASE_ORDER.map(p => matrixCell(c,p,'phase',priorityPhases)).join('')}
@@ -2223,7 +2268,7 @@ document.getElementById('downloadJson').addEventListener('click',()=>download('f
 document.getElementById('downloadCsv').addEventListener('click',()=>download('facility-diagnostic-tool-summary.csv',makeCsv(),'text/csv'));
 document.getElementById('clearAll').addEventListener('click',()=>{ if(confirm('Clear all saved data in this browser?')){ localStorage.removeItem(STORE_KEY); state=defaultState(); activeWardIndex=0; activeRespondentIndex=0; renderAll(); } });
 window.__diagnosticTool = {state, eecc, lccQuestions, calculateFacilityAvailabilityScore, calculateWardReadinessScore, calculateLccSummary, renderAll};
-try { renderAll(); document.getElementById('loadStatus').innerHTML='<div class="instruction-box success-box"><b>Loaded:</b> EECC facility rows 34/34, ward rows 35/35, LCC items 7/7. Single-file v44.</div>'; } catch(e){ console.error(e); document.getElementById('loadStatus').innerHTML=`<div class="instruction-box error-box"><b>Loading error:</b> ${esc(e.message)}</div>`; }
+try { renderAll(); document.getElementById('loadStatus').innerHTML='<div class="instruction-box success-box"><b>Loaded:</b> EECC facility rows 34/34, ward rows 35/35, LCC items 7/7. Single-file v45.</div>'; } catch(e){ console.error(e); document.getElementById('loadStatus').innerHTML=`<div class="instruction-box error-box"><b>Loading error:</b> ${esc(e.message)}</div>`; }
 </script>
 </body>
 </html>
